@@ -22,13 +22,13 @@
 
 module blk_mem_top(
     input clk,
-    input ren,
+    input wen,
     input [14:0] addr,
     input [31:0] din,
     output [31:0] dout,
     output reg read_valid
     );
-    blk_mem_gen M(clk, {ren,ren,ren,ren}, addr, din, dout);
+    blk_mem_gen M(clk, {wen,wen,wen,wen}, addr, din, dout);
     reg [15:0] prev_op;
     always @(posedge clk) begin
         prev_op <= {addr, ren};
