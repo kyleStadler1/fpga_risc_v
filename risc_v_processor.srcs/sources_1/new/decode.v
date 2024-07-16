@@ -75,6 +75,8 @@ module decode(
     reg [6:0] _opcode;
     reg [2:0] _funct3;
     reg [6:0] _funct7;
+    reg [4:0] _rs1;
+    reg [4:0] _rs2;
     reg [4:0] _rd;
     reg [19:0] _imm;
     reg [3:0] _alu_ctrl;
@@ -122,7 +124,7 @@ module decode(
                             end
             I_TYPE : begin
                             //I alu imm Type
-                            _imm = {8{0}, _funct7, _rs2};
+                            _imm = {{8{0}}, _funct7, _rs2};
                             _alu_src = SRC_IMM;
                             _reg_write = 1;
                             _mem_read = 0;
@@ -146,7 +148,7 @@ module decode(
                             end
             LOAD : begin 
                             //I load Type
-                            _imm = {8{0}, _funct7, _rs2};
+                            _imm = {{8{0}}, _funct7, _rs2};
                             _alu_ctrl = ALU_ADD;
                             _alu_src = SRC_IMM;
                             _reg_write = 1;
@@ -168,7 +170,7 @@ module decode(
             STORE : begin
                             //S Type
                             _rd = 5'bx;
-                            _imm = {13{0}, _funct7};
+                            _imm = {{13{0}}, _funct7};
                             _alu_ctrl = ALU_ADD;
                             _alu_src = SRC_IMM;
                             _reg_write = 0;
@@ -188,7 +190,7 @@ module decode(
             BRANCH : begin
                             //B Type
                             _rd = 5'bx;
-                            _imm = {13{0}, _funct7};
+                            _imm = {{13{0}}, _funct7};
                             _alu_src = SRC_REG;
                             _reg_write = 0;
                             _mem_read = 0;
@@ -212,7 +214,7 @@ module decode(
                             //J Type jal
                             _imm = {_funct7, _rs2, _rs1, _funct3};
                             _alu_ctrl = ALU_ADD;
-                            _alu_src = SEC_IMM;
+                            _alu_src = SEL_IMM;
                             _rs1 = PC_ADDR;
                             _reg_write = 1;
                             _mem_read = 0;
@@ -226,7 +228,7 @@ module decode(
                             end
             JALR : begin
                             //I Type jalr
-                            _imm = {8{0}, _funct7, _rs2};
+                            _imm = {{8{0}}, _funct7, _rs2};
                             _alu_ctrl = ALU_ADD;
                             _alu_src = SRC_IMM;
                             _reg_write = 1;

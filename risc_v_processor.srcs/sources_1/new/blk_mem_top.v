@@ -30,9 +30,9 @@ module blk_mem_top(
     );
     blk_mem_gen M(clk, {wen,wen,wen,wen}, addr, din, dout);
     reg [15:0] prev_op;
-    always @(posedge clk) begin
-        prev_op <= {addr, ren};
-        read_valid <= prev_op == {addr, ren};
+    always @(posedge clk) begin 
+        prev_op <= {addr, wen};
+        read_valid <= prev_op == {addr, wen};
    end 
 endmodule
 
