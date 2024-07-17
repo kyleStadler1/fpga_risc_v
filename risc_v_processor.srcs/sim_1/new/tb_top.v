@@ -35,12 +35,10 @@ module tb_top;
    prog_ctr pc(clk, pc_en, pc_rst, alu_out_to_pc, pc_sel, pc_instr_addr);
    
 
-   wire [31:0] instr_input_addr;
    //IMEM inputs
    //clk
     reg [3:0] imem_wen;
     reg [13:0] imem_addr;
-    assign imem_addr = imem_wen ? instr_addr : pc_instr_addr;
     reg [31:0] imem_din;
     //IMEM outputs
     wire [31:0] imem_dout;
@@ -51,6 +49,7 @@ module tb_top;
     //DECODE inputs
     //clk
     //wire [31:0] decode_instr;
+    reg decode_en;
     
     //DECODE outputs
     wire [4:0] decode_rs1;
@@ -71,7 +70,8 @@ module tb_top;
     //DECODE Instantiation
     decode decode(
         clk, 
-        imem_dout, 
+        imem_dout,
+        decode_en, 
         decode_rs1, 
         decode_rs2, 
         decode_rd, 
@@ -88,12 +88,24 @@ module tb_top;
         decode_lui,
         decode_aupc
         );
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
         reg[31:0] ctr;
         reg [31:0] instrs [0:10];
         initial begin
             clk <= 0;
             ctr <= 0;
             pc_en <= 0;
+            decode_en <= 0;
             instrs[0] <= 32'h00000297; // auipc t0, 0x0
             instrs[1] <= 32'h00028067; // addi t0, t0, offset for value1
             instrs[2] <= 32'h0002a003; // lw t1, 0(t0)
@@ -113,17 +125,16 @@ module tb_top;
 
         always @(posedge clk) begin
             ctr <= ctr + 1;
-            if (ctr <= 10) begin
+            if (ctr <= 10) begin //program mode
                 imem_wen = 4'b1111;
-                instr_addr = ctr;
+                imem_addr = ctr;
                 imem_din = instrs[ctr];
-            end else begin
-                pc_instr_addr = pc_instr[31:2]; 
-                if (ctr == 11) begin
-                    imem_wen = 4'b0000;
-                    pc_en <= 1;
-                end
-                
+            end else begin //execute mode
+                imem_din = 1'bx;
+                assign imem_addr = pc_instr_addr[31:2]; 
+                imem_wen = 4'b0000;
+                pc_en <= 1;
+                decode_en <= 1;
             end
         end
         

@@ -21,22 +21,23 @@
 module decode(
     input clk, 
     input [31:0] instr,
+    input en,
 
     output wire [4:0] rs1, //rs1, rs2 are combinatorial throughout since it goes out to reg file and regFile[rs1 and rs2] values 
     output wire [4:0] rs2, //@ clock edge will be ready, same time as below signals are latched out.
-    output reg [4:0] rd,
-    output reg [19:0] imm,
-    output reg [3:0] alu_ctrl,
-    output reg alu_src,
-    output reg reg_write, 
-    output reg mem_read,
-    output reg mem_write,
-    output reg [3:0] mem_size,
-    output reg branch,
-    output reg jump,
-    output reg jump_reg,
-    output reg lui,
-    output reg aupc
+    output  [4:0] rd,
+    output  [19:0] imm,
+    output  [3:0] alu_ctrl,
+    output  alu_src,
+    output  reg_write, 
+    output  mem_read,
+    output  mem_write,
+    output  [3:0] mem_size,
+    output  branch,
+    output  jump,
+    output  jump_reg,
+    output  lui,
+    output  aupc
     );
     //alu ctrl 
     parameter ALU_AND  = 4'b0000;  
@@ -97,225 +98,256 @@ module decode(
         //_rs1 = instr[19:15];
         //_rs2 = instr[24:20];
         _funct7 = instr[31:25];
-        case(_opcode)
-            R_TYPE : begin
-                            //R Type
-                            _rs1 = instr[19:15];
-                            _rs2 = instr[24:20];
-                            _rd = instr[11:7];
-                            _imm = 20'bx;
-                            case(_funct3)
-                                3'h0 : _alu_ctrl = (_funct7 == 0) ? ALU_ADD : ALU_SUB;
-                                3'h4 : _alu_ctrl = ALU_XOR;
-                                3'h6 : _alu_ctrl = ALU_OR;
-                                3'h7 : _alu_ctrl = ALU_AND;
-                                3'h1 : _alu_ctrl = ALU_SLL;
-                                3'h5 : _alu_ctrl = (_funct7 == 0) ? ALU_SRL : ALU_SRA;
-                                3'h2 : _alu_ctrl = ALU_SLT;
-                                3'h3 : _alu_ctrl = ALU_SLTU;
-                            endcase
-                            _alu_src = SRC_REG;
-                            _reg_write = 1;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'bxx;
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 0;
-                            _aupc = 0;
-  
-                            end
-            I_TYPE : begin
-                            //I alu imm Type
-                            _rs1 = instr[19:15];
-                            _rs2 = 5'bxxxxx;
-                            _rd = instr[11:7];
-                            _imm = {8'b0, _funct7, _rs2};
-                            case(_funct3)
-                                3'h0 : _alu_ctrl = ALU_ADD;
-                                3'h4 : _alu_ctrl = ALU_XOR;
-                                3'h6 : _alu_ctrl = ALU_OR;
-                                3'h7 : _alu_ctrl = ALU_AND;
-                                3'h1 : _alu_ctrl = ALU_SLL;
-                                3'h5 : _alu_ctrl = (_funct7 == 0) ? ALU_SRL : ALU_SRA; 
-                                3'h2 : alu_ctrl = ALU_SLT; 
-                                3'h3 : alu_ctrl = ALU_SLTU;
-                            endcase
-                            _alu_src = SRC_IMM;
-                            _reg_write = 1;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'bxx;
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 0;
-                            _aupc = 0;
-                            end
-            LOAD : begin 
-                            //I load Type
-                            _rs1 = instr[19:15];
-                            _rs2 = 5'bxxxxx;
-                            _rd = instr[11:7];
-                            _imm = {8'b0, _funct7, _rs2};
-                            _alu_ctrl = ALU_ADD;
-                            _alu_src = SRC_IMM;
-                            _reg_write = 1;
-                            _mem_read = 1;
-                            _mem_write = 0;
-                            case(_funct3)
-                                3'h0 : _mem_size = 2'b01;
-                                3'h1 : _mem_size = 2'b10;
-                                3'h2 : _mem_size = 2'b11;
-                                3'h4 : _mem_size = 2'b01; //havent implemented signed load
-                                3'h5 : _mem_size = 4'b10; //havent implemented signed load
-                            endcase
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 0;
-                            _aupc = 0;
-
-                            end
-            STORE : begin
-                            //S Type
-                            _rs1 = instr[19:15];
-                            _rs2 = instr[24:20];
-                            _rd = 5'bxxxxx;
-                            _imm = {13'b0, _funct7};
-                            _alu_ctrl = ALU_ADD;
-                            _alu_src = SRC_IMM;
-                            _reg_write = 0;
-                            _mem_read = 0;
-                            _mem_write = 1;
-                            case(_funct3)
-                                3'h0 : _mem_size = 2'b01;
-                                3'h1 : _mem_size = 2'b10;
-                                3'h2 : _mem_size = 2'b11;
-                            endcase 
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 0;
-                            _aupc = 0;
-
-                            end
-            BRANCH : begin
-                            //B Type
-                            _rs1 = instr[19:15];
-                            _rs2 = instr[24:20];
-                            _rd = 5'bxxxxx;
-                            _imm = {13'b0, _funct7};
-                            case(_funct3)
-                                3'h0 : _alu_ctrl = ALU_BEQ;
-                                3'h1 : _alu_ctrl = ALU_BNE;
-                                3'h4 : _alu_ctrl = ALU_BLT;
-                                3'h5 : _alu_ctrl = ALU_BGET;
-                                3'h6 : _alu_ctrl = ALU_BLT;
-                                3'h7 : _alu_ctrl = ALU_BGET;
-                            endcase
-                            _alu_src = SRC_REG;
-                            _reg_write = 0;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'bxx;
-                            _branch = 1;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 0;
-                            _aupc = 0;
-                            end
-            JAL : begin
-                            //J Type jal
-                            _rs1 = PC_ADDR;
-                            _rs2 = 5'bxxxxx;
-                            _rd = instr[11:7];
-                            _imm = {_funct7, _rs2, _rs1, _funct3};
-                            _alu_ctrl = ALU_ADD;
-                            _alu_src = SRC_IMM;
-                            _reg_write = 1;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'bxx;
-                            _branch = 0;
-                            _jump = 1;
-                            _jump_reg = 0;
-                            _lui = 0;
-                            _aupc = 0;
-                            end
-            JALR : begin
-                            //I Type jalr
-                            _rs1 = PC_ADDR;
-                            _rs2 = 5'bxxxxx;
-                            _rd = instr[11:7];
-                            _imm = {8'b0, _funct7, _rs2};
-                            _alu_ctrl = ALU_ADD;
-                            _alu_src = SRC_IMM;
-                            _reg_write = 1;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'bxx;
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 1;
-                            _lui = 0;
-                            _aupc = 0;
-                            end
-            LUI : begin
-                            //U Type lui
-                            _rs1 = 5'bxxxxx;
-                            _rs2 = 5'bxxxxx;
-                            _rd = instr[11:7];
-                            _imm = {_funct7, _rs2, _rs1, _funct3};
-                            _alu_ctrl = ALU_SLL;
-                            _alu_src = 1'bx;
-                            _reg_write = 1;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'bxx;
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 1;
-                            _aupc = 0;
-                            end
-            AUIPC : begin
-                            //U Type aupc
-                            _rs1 = 5'bxxxxx;
-                            _rs2 = 5'bxxxxx;
-                            _rd = instr[11:7];
-                            _imm = {_funct7, _rs2, _rs1, _funct3};
-                            _alu_ctrl = ALU_SLL;
-                            _alu_src = 1'bx;
-                            _reg_write = 1;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'bxx;
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 0;
-                            _aupc = 1;
-                            end
-            ENV : begin
-                            //I Type Environment Call
-                            end
-            endcase
-        rd <= _rd;
-        imm <= _imm;
-        alu_ctrl <= _alu_ctrl;
-        alu_src <= _alu_src;
-        reg_write <= _reg_write;
-        mem_read <= _mem_read;
-        mem_write <= _mem_write;
-        mem_size <= _mem_size;
-        branch <= _branch;
-        jump <= _jump;
-        jump_reg <= _jump_reg;
-        lui <= _lui;
-        aupc <= _aupc;
+        if (en) begin
+            case(_opcode)
+                R_TYPE : begin
+                                //R Type
+                                _rs1 = instr[19:15];
+                                _rs2 = instr[24:20];
+                                _rd = instr[11:7];
+                                _imm = 20'bx;
+                                case(_funct3)
+                                    3'h0 : _alu_ctrl = (_funct7 == 0) ? ALU_ADD : ALU_SUB;
+                                    3'h4 : _alu_ctrl = ALU_XOR;
+                                    3'h6 : _alu_ctrl = ALU_OR;
+                                    3'h7 : _alu_ctrl = ALU_AND;
+                                    3'h1 : _alu_ctrl = ALU_SLL;
+                                    3'h5 : _alu_ctrl = (_funct7 == 0) ? ALU_SRL : ALU_SRA;
+                                    3'h2 : _alu_ctrl = ALU_SLT;
+                                    3'h3 : _alu_ctrl = ALU_SLTU;
+                                endcase
+                                _alu_src = SRC_REG;
+                                _reg_write = 1;
+                                _mem_read = 0;
+                                _mem_write = 0;
+                                _mem_size = 2'bxx;
+                                _branch = 0;
+                                _jump = 0;
+                                _jump_reg = 0;
+                                _lui = 0;
+                                _aupc = 0;
+      
+                                end
+                I_TYPE : begin
+                                //I alu imm Type
+                                _rs1 = instr[19:15];
+                                _rs2 = 5'bxxxxx;
+                                _rd = instr[11:7];
+                                _imm = {8'b0, _funct7, instr[24:20]};
+                                case(_funct3)
+                                    3'h0 : _alu_ctrl = ALU_ADD;
+                                    3'h4 : _alu_ctrl = ALU_XOR;
+                                    3'h6 : _alu_ctrl = ALU_OR;
+                                    3'h7 : _alu_ctrl = ALU_AND;
+                                    3'h1 : _alu_ctrl = ALU_SLL;
+                                    3'h5 : _alu_ctrl = (_funct7 == 0) ? ALU_SRL : ALU_SRA; 
+                                    3'h2 : _alu_ctrl = ALU_SLT; 
+                                    3'h3 : _alu_ctrl = ALU_SLTU;
+                                endcase
+                                _alu_src = SRC_IMM;
+                                _reg_write = 1;
+                                _mem_read = 0;
+                                _mem_write = 0;
+                                _mem_size = 2'bxx;
+                                _branch = 0;
+                                _jump = 0;
+                                _jump_reg = 0;
+                                _lui = 0;
+                                _aupc = 0;
+                                end
+                LOAD : begin 
+                                //I load Type
+                                _rs1 = instr[19:15];
+                                _rs2 = 5'bxxxxx;
+                                _rd = instr[11:7];
+                                _imm = {8'b0, _funct7, instr[24:20]};
+                                _alu_ctrl = ALU_ADD;
+                                _alu_src = SRC_IMM;
+                                _reg_write = 1;
+                                _mem_read = 1;
+                                _mem_write = 0;
+                                case(_funct3)
+                                    3'h0 : _mem_size = 2'b01;
+                                    3'h1 : _mem_size = 2'b10;
+                                    3'h2 : _mem_size = 2'b11;
+                                    3'h4 : _mem_size = 2'b01; //havent implemented signed load
+                                    3'h5 : _mem_size = 4'b10; //havent implemented signed load
+                                endcase
+                                _branch = 0;
+                                _jump = 0;
+                                _jump_reg = 0;
+                                _lui = 0;
+                                _aupc = 0;
+    
+                                end
+                STORE : begin
+                                //S Type
+                                _rs1 = instr[19:15];
+                                _rs2 = instr[24:20];
+                                _rd = 5'bxxxxx;
+                                _imm = {13'b0, _funct7};
+                                _alu_ctrl = ALU_ADD;
+                                _alu_src = SRC_IMM;
+                                _reg_write = 0;
+                                _mem_read = 0;
+                                _mem_write = 1;
+                                case(_funct3)
+                                    3'h0 : _mem_size = 2'b01;
+                                    3'h1 : _mem_size = 2'b10;
+                                    3'h2 : _mem_size = 2'b11;
+                                endcase 
+                                _branch = 0;
+                                _jump = 0;
+                                _jump_reg = 0;
+                                _lui = 0;
+                                _aupc = 0;
+    
+                                end
+                BRANCH : begin
+                                //B Type
+                                _rs1 = instr[19:15];
+                                _rs2 = instr[24:20];
+                                _rd = 5'bxxxxx;
+                                _imm = {13'b0, _funct7};
+                                case(_funct3)
+                                    3'h0 : _alu_ctrl = ALU_BEQ;
+                                    3'h1 : _alu_ctrl = ALU_BNE;
+                                    3'h4 : _alu_ctrl = ALU_BLT;
+                                    3'h5 : _alu_ctrl = ALU_BGET;
+                                    3'h6 : _alu_ctrl = ALU_BLT;
+                                    3'h7 : _alu_ctrl = ALU_BGET;
+                                endcase
+                                _alu_src = SRC_REG;
+                                _reg_write = 0;
+                                _mem_read = 0;
+                                _mem_write = 0;
+                                _mem_size = 2'bxx;
+                                _branch = 1;
+                                _jump = 0;
+                                _jump_reg = 0;
+                                _lui = 0;
+                                _aupc = 0;
+                                end
+                JAL : begin
+                                //J Type jal
+                                _rs1 = PC_ADDR;
+                                _rs2 = 5'bxxxxx;
+                                _rd = instr[11:7];
+                                _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
+                                _alu_ctrl = ALU_ADD;
+                                _alu_src = SRC_IMM;
+                                _reg_write = 1;
+                                _mem_read = 0;
+                                _mem_write = 0;
+                                _mem_size = 2'bxx;
+                                _branch = 0;
+                                _jump = 1;
+                                _jump_reg = 0;
+                                _lui = 0;
+                                _aupc = 0;
+                                end
+                JALR : begin
+                                //I Type jalr
+                                _rs1 = PC_ADDR;
+                                _rs2 = 5'bxxxxx;
+                                _rd = instr[11:7];
+                                _imm = {8'b0, _funct7, instr[24:20]};
+                                _alu_ctrl = ALU_ADD;
+                                _alu_src = SRC_IMM;
+                                _reg_write = 1;
+                                _mem_read = 0;
+                                _mem_write = 0;
+                                _mem_size = 2'bxx;
+                                _branch = 0;
+                                _jump = 0;
+                                _jump_reg = 1;
+                                _lui = 0;
+                                _aupc = 0;
+                                end
+                LUI : begin
+                                //U Type lui
+                                _rs1 = 5'bxxxxx;
+                                _rs2 = 5'bxxxxx;
+                                _rd = instr[11:7];
+                                _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
+                                _alu_ctrl = ALU_SLL;
+                                _alu_src = 1'bx;
+                                _reg_write = 1;
+                                _mem_read = 0;
+                                _mem_write = 0;
+                                _mem_size = 2'bxx;
+                                _branch = 0;
+                                _jump = 0;
+                                _jump_reg = 0;
+                                _lui = 1;
+                                _aupc = 0;
+                                end
+                AUIPC : begin
+                                //U Type aupc
+                                _rs1 = 5'bxxxxx;
+                                _rs2 = 5'bxxxxx;
+                                _rd = instr[11:7];
+                                _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
+                                _alu_ctrl = ALU_SLL;
+                                _alu_src = 1'bx;
+                                _reg_write = 1;
+                                _mem_read = 0;
+                                _mem_write = 0;
+                                _mem_size = 2'bxx;
+                                _branch = 0;
+                                _jump = 0;
+                                _jump_reg = 0;
+                                _lui = 0;
+                                _aupc = 1;
+                                end
+                ENV : begin
+                                //I Type Environment Call
+                                end
+                endcase
+            end else begin
+                _rs1 = 1'bx;
+                _rs2 = 1'bx;
+                _rd = 1'bx;
+                _imm = 1'bx;
+                _alu_ctrl = 1'bx;
+                _alu_src = 1'bx;
+                _reg_write = 1'bx;
+                _mem_read = 1'bx;
+                _mem_write = 1'bx;
+                _mem_size = 1'bx;
+                _branch = 1'bx;
+                _jump = 1'bx;
+                _jump_reg = 1'bx;
+                _lui = 1'bx;
+                _aupc = 1'bx;
+            end        
+//        rd <= _rd;
+//        imm <= _imm;
+//        alu_ctrl <= _alu_ctrl;
+//        alu_src <= _alu_src;
+//        reg_write <= _reg_write;
+//        mem_read <= _mem_read;
+//        mem_write <= _mem_write;
+//        mem_size <= _mem_size;
+//        branch <= _branch;
+//        jump <= _jump;
+//        jump_reg <= _jump_reg;
+//        lui <= _lui;
+//        aupc <= _aupc;
     end
     assign rs1 = _rs1;
     assign rs2 = _rs2;
+    assign rd = _rd;
+    assign imm = _imm;
+    assign alu_ctrl = _alu_ctrl;
+    assign alu_src = _alu_src;
+    assign reg_write = _reg_write;
+    assign mem_read = _mem_read;
+    assign mem_write = _mem_write;
+    assign mem_size = _mem_size;
+    assign branch = _branch;
+    assign jump = _jump;
+    assign jump_reg = _jump_reg;
+    assign lui = _lui;
+    assign aupc = _aupc;
 endmodule

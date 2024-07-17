@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 07/16/2024 01:14:36 AM
+// Create Date: 07/17/2024 01:32:13 AM
 // Design Name: 
-// Module Name: instr_blk_mem_top
+// Module Name: fetch_to_decode_reg_wall
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,13 +20,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module instr_blk_mem_top(
+module fetch_to_decode_reg_wall( //double wide reg wall!!!
     input clk,
-    input [3:0] wen,
-    input [13:0] addr, //word addressed
-    input [31:0] din,
-    output [31:0] dout,
-    output reg read_valid
+    input en,
+    input [31:0] pc_val_in,
+    output reg [31:0] pc_val
     );
-    blk_mem_gen_i M_i(clk, wen, addr, din, dout);
+    reg [31:0] pc_val_intermediate;
+    always @(posedge clk) begin
+        if (en) begin
+            pc_val_intermediate <= pc_val_in;
+            pc_val <= pc_val_intermediate;
+        end    
+    end
 endmodule

@@ -30,13 +30,13 @@ module prog_ctr(
     );
     parameter RST_VECT = 32'h0;
     reg[31:0] curr_instr; 
-    reg[31:0] next_instr = RST_VECT;
+    reg[31:0] next_instr;
     initial begin
         curr_instr = RST_VECT;
     end
     always @(posedge clk) begin
         if (rst) begin
-            next_instr <= RST_VECT;
+            next_instr = RST_VECT;
         end else if (en) begin
             case(sel)
                 1'b1 : next_instr = alu_output;
