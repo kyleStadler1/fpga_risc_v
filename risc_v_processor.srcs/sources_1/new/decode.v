@@ -22,6 +22,7 @@ module decode(
     input clk, 
     //input en, 
     input [31:0] instr,
+
     output wire [4:0] rs1, //rs1, rs2 are combinatorial throughout since it goes out to reg file and regFile[rs1 and rs2] values 
     output wire [4:0] rs2, //@ clock edge will be ready, same time as below signals are latched out.
     output reg [4:0] rd,
@@ -92,25 +93,18 @@ module decode(
     reg _aupc;
     always @(posedge clk) begin
         _opcode = instr[6:0];
-        _rd = instr[11:7];
+        //_rd = instr[11:7];
         _funct3 = instr[14:12];
-        _rs1 = instr[19:15];
-        _rs2 = instr[24:20];
+        //_rs1 = instr[19:15];
+        //_rs2 = instr[24:20];
         _funct7 = instr[31:25];
         case(_opcode)
             R_TYPE : begin
                             //R Type
+                            _rs1 = instr[19:15];
+                            _rs2 = instr[24:20];
+                            _rd = instr[11:7];
                             _imm = 20'bx;
-                            _alu_src = SRC_REG;
-                            _reg_write = 1;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'b00;
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 1;
-                            _aupc = 0;
                             case(_funct3)
                                 3'h0 : _alu_ctrl = (_funct7 == 0) ? ALU_ADD : ALU_SUB;
                                 3'h4 : _alu_ctrl = ALU_XOR;
@@ -120,21 +114,25 @@ module decode(
                                 3'h5 : _alu_ctrl = (_funct7 == 0) ? ALU_SRL : ALU_SRA;
                                 3'h2 : _alu_ctrl = ALU_SLT;
                                 3'h3 : _alu_ctrl = ALU_SLTU;
-                                endcase
-                            end
-            I_TYPE : begin
-                            //I alu imm Type
-                            _imm = {8'b0, _funct7, _rs2};
-                            _alu_src = SRC_IMM;
+                            endcase
+                            _alu_src = SRC_REG;
                             _reg_write = 1;
                             _mem_read = 0;
                             _mem_write = 0;
-                            _mem_size = 2'b00;
+                            _mem_size = 2'bxx;
                             _branch = 0;
                             _jump = 0;
                             _jump_reg = 0;
-                            _lui = 1;
+                            _lui = 0;
                             _aupc = 0;
+  
+                            end
+            I_TYPE : begin
+                            //I alu imm Type
+                            _rs1 = instr[19:15];
+                            _rs2 = 5'bxxxxx;
+                            _rd = instr[11:7];
+                            _imm = {8'b0, _funct7, _rs2};
                             case(_funct3)
                                 3'h0 : _alu_ctrl = ALU_ADD;
                                 3'h4 : _alu_ctrl = ALU_XOR;
@@ -144,63 +142,72 @@ module decode(
                                 3'h5 : _alu_ctrl = (_funct7 == 0) ? ALU_SRL : ALU_SRA; 
                                 3'h2 : alu_ctrl = ALU_SLT; 
                                 3'h3 : alu_ctrl = ALU_SLTU;
-                                endcase
+                            endcase
+                            _alu_src = SRC_IMM;
+                            _reg_write = 1;
+                            _mem_read = 0;
+                            _mem_write = 0;
+                            _mem_size = 2'bxx;
+                            _branch = 0;
+                            _jump = 0;
+                            _jump_reg = 0;
+                            _lui = 0;
+                            _aupc = 0;
                             end
             LOAD : begin 
                             //I load Type
+                            _rs1 = instr[19:15];
+                            _rs2 = 5'bxxxxx;
+                            _rd = instr[11:7];
                             _imm = {8'b0, _funct7, _rs2};
                             _alu_ctrl = ALU_ADD;
                             _alu_src = SRC_IMM;
                             _reg_write = 1;
                             _mem_read = 1;
                             _mem_write = 0;
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 1;
-                            _aupc = 0;
                             case(_funct3)
                                 3'h0 : _mem_size = 2'b01;
                                 3'h1 : _mem_size = 2'b10;
                                 3'h2 : _mem_size = 2'b11;
                                 3'h4 : _mem_size = 2'b01; //havent implemented signed load
                                 3'h5 : _mem_size = 4'b10; //havent implemented signed load
-                                endcase
+                            endcase
+                            _branch = 0;
+                            _jump = 0;
+                            _jump_reg = 0;
+                            _lui = 0;
+                            _aupc = 0;
+
                             end
             STORE : begin
                             //S Type
-                            _rd = 5'bx;
+                            _rs1 = instr[19:15];
+                            _rs2 = instr[24:20];
+                            _rd = 5'bxxxxx;
                             _imm = {13'b0, _funct7};
                             _alu_ctrl = ALU_ADD;
                             _alu_src = SRC_IMM;
                             _reg_write = 0;
                             _mem_read = 0;
                             _mem_write = 1;
-                            _branch = 0;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 1;
-                            _aupc = 0;
                             case(_funct3)
                                 3'h0 : _mem_size = 2'b01;
                                 3'h1 : _mem_size = 2'b10;
                                 3'h2 : _mem_size = 2'b11;
-                                endcase 
+                            endcase 
+                            _branch = 0;
+                            _jump = 0;
+                            _jump_reg = 0;
+                            _lui = 0;
+                            _aupc = 0;
+
                             end
             BRANCH : begin
                             //B Type
-                            _rd = 5'bx;
+                            _rs1 = instr[19:15];
+                            _rs2 = instr[24:20];
+                            _rd = 5'bxxxxx;
                             _imm = {13'b0, _funct7};
-                            _alu_src = SRC_REG;
-                            _reg_write = 0;
-                            _mem_read = 0;
-                            _mem_write = 0;
-                            _mem_size = 2'b00;
-                            _branch = 1;
-                            _jump = 0;
-                            _jump_reg = 0;
-                            _lui = 1;
-                            _aupc = 0;
                             case(_funct3)
                                 3'h0 : _alu_ctrl = ALU_BEQ;
                                 3'h1 : _alu_ctrl = ALU_BNE;
@@ -208,33 +215,48 @@ module decode(
                                 3'h5 : _alu_ctrl = ALU_BGET;
                                 3'h6 : _alu_ctrl = ALU_BLT;
                                 3'h7 : _alu_ctrl = ALU_BGET;
-                                endcase
+                            endcase
+                            _alu_src = SRC_REG;
+                            _reg_write = 0;
+                            _mem_read = 0;
+                            _mem_write = 0;
+                            _mem_size = 2'bxx;
+                            _branch = 1;
+                            _jump = 0;
+                            _jump_reg = 0;
+                            _lui = 0;
+                            _aupc = 0;
                             end
             JAL : begin
                             //J Type jal
+                            _rs1 = PC_ADDR;
+                            _rs2 = 5'bxxxxx;
+                            _rd = instr[11:7];
                             _imm = {_funct7, _rs2, _rs1, _funct3};
                             _alu_ctrl = ALU_ADD;
                             _alu_src = SRC_IMM;
-                            _rs1 = PC_ADDR;
                             _reg_write = 1;
                             _mem_read = 0;
                             _mem_write = 0;
-                            _mem_size = 2'b00;
+                            _mem_size = 2'bxx;
                             _branch = 0;
                             _jump = 1;
                             _jump_reg = 0;
-                            _lui = 1;
+                            _lui = 0;
                             _aupc = 0;
                             end
             JALR : begin
                             //I Type jalr
+                            _rs1 = PC_ADDR;
+                            _rs2 = 5'bxxxxx;
+                            _rd = instr[11:7];
                             _imm = {8'b0, _funct7, _rs2};
                             _alu_ctrl = ALU_ADD;
                             _alu_src = SRC_IMM;
                             _reg_write = 1;
                             _mem_read = 0;
                             _mem_write = 0;
-                            _mem_size = 2'b00;
+                            _mem_size = 2'bxx;
                             _branch = 0;
                             _jump = 0;
                             _jump_reg = 1;
@@ -243,13 +265,16 @@ module decode(
                             end
             LUI : begin
                             //U Type lui
+                            _rs1 = 5'bxxxxx;
+                            _rs2 = 5'bxxxxx;
+                            _rd = instr[11:7];
                             _imm = {_funct7, _rs2, _rs1, _funct3};
                             _alu_ctrl = ALU_SLL;
                             _alu_src = 1'bx;
                             _reg_write = 1;
                             _mem_read = 0;
                             _mem_write = 0;
-                            _mem_size = 2'b00;
+                            _mem_size = 2'bxx;
                             _branch = 0;
                             _jump = 0;
                             _jump_reg = 0;
@@ -258,13 +283,16 @@ module decode(
                             end
             AUIPC : begin
                             //U Type aupc
+                            _rs1 = 5'bxxxxx;
+                            _rs2 = 5'bxxxxx;
+                            _rd = instr[11:7];
                             _imm = {_funct7, _rs2, _rs1, _funct3};
                             _alu_ctrl = ALU_SLL;
                             _alu_src = 1'bx;
                             _reg_write = 1;
                             _mem_read = 0;
                             _mem_write = 0;
-                            _mem_size = 2'b00;
+                            _mem_size = 2'bxx;
                             _branch = 0;
                             _jump = 0;
                             _jump_reg = 0;
