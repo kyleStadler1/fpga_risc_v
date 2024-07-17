@@ -20,7 +20,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 module decode(
     input clk, 
-    //input en, 
     input [31:0] instr,
 
     output wire [4:0] rs1, //rs1, rs2 are combinatorial throughout since it goes out to reg file and regFile[rs1 and rs2] values 

@@ -30,14 +30,17 @@ module tb_top;
     wire [31:0] alu_out_to_pc;
     wire pc_sel = 0;
     //PC outputs
-    wire [31:0] pc_instr;
+    wire [31:0] pc_instr_addr;
    //PC Instantiation
-   prog_ctr pc(clk, pc_en, pc_rst, alu_out_to_pc, pc_sel, pc_instr);
+   prog_ctr pc(clk, pc_en, pc_rst, alu_out_to_pc, pc_sel, pc_instr_addr);
    
+
+   wire [31:0] instr_input_addr;
    //IMEM inputs
    //clk
     reg [3:0] imem_wen;
     reg [13:0] imem_addr;
+    assign imem_addr = imem_wen ? instr_addr : pc_instr_addr;
     reg [31:0] imem_din;
     //IMEM outputs
     wire [31:0] imem_dout;
@@ -107,16 +110,15 @@ module tb_top;
         always begin
             #10clk <= ~clk;
         end
-        
-        
+
         always @(posedge clk) begin
             ctr <= ctr + 1;
             if (ctr <= 10) begin
                 imem_wen = 4'b1111;
-                imem_addr = ctr;
+                instr_addr = ctr;
                 imem_din = instrs[ctr];
             end else begin
-                imem_addr = pc_instr[31:2];
+                pc_instr_addr = pc_instr[31:2]; 
                 if (ctr == 11) begin
                     imem_wen = 4'b0000;
                     pc_en <= 1;
