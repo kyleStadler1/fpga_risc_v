@@ -23,21 +23,23 @@ module decode(
     input [31:0] instr,
     input en,
 
-    output wire [4:0] rs1, //rs1, rs2 are combinatorial throughout since it goes out to reg file and regFile[rs1 and rs2] values 
-    output wire [4:0] rs2, //@ clock edge will be ready, same time as below signals are latched out.
+    output [4:0] rs1, 
+    output [4:0] rs2, 
     output  [4:0] rd,
     output  [19:0] imm,
     output  [3:0] alu_ctrl,
-    output  alu_src,
+    output  [1:0] alu_sel_A,
+    output  [1:0] alu_sel_B;
     output  reg_write, 
     output  mem_read,
     output  mem_write,
     output  [3:0] mem_size,
     output  branch,
-    output  jump,
-    output  jump_reg,
+    output  jal,
+    output  jalr,
     output  lui,
-    output  aupc
+    output  aupc,
+   //output multiop
     );
     //alu ctrl 
     parameter ALU_AND  = 4'b0000;  
@@ -57,8 +59,12 @@ module decode(
     parameter ALU_BLT = 4'b1110;  
     parameter ALU_BGET = 4'b1111;  
     //alu input src
-    parameter SRC_REG = 0;
-    parameter SRC_IMM = 1;
+    parameter RS2_to_A = 2'b00;
+    parameter IMM_to_A = 2'b01;
+    parameter 4_to_A = 2'b10;
+    parameter RS1_to_B = 2'b00;
+    parameter PC_to_B = 2'b01;
+    parameter 12_to_B = 2'b10;
     //input instr Type
     parameter R_TYPE = 7'b0110011;
     parameter I_TYPE = 7'b0010011;
@@ -81,7 +87,8 @@ module decode(
     reg [4:0] _rd;
     reg [19:0] _imm;
     reg [3:0] _alu_ctrl;
-    reg _alu_src;
+    reg [1:0] _alu_sel_A;
+    reg [1:0] _alu_sel_B;
     reg _reg_write; 
     reg _mem_read;
     reg _mem_write;
@@ -116,7 +123,8 @@ module decode(
                                     3'h2 : _alu_ctrl = ALU_SLT;
                                     3'h3 : _alu_ctrl = ALU_SLTU;
                                 endcase
-                                _alu_src = SRC_REG;
+                                _alu_sel_A = RS2_to_A;
+                                _alu_sel_B = RS1_to_B;
                                 _reg_write = 1;
                                 _mem_read = 0;
                                 _mem_write = 0;
@@ -126,7 +134,6 @@ module decode(
                                 _jump_reg = 0;
                                 _lui = 0;
                                 _aupc = 0;
-      
                                 end
                 I_TYPE : begin
                                 //I alu imm Type
@@ -144,7 +151,8 @@ module decode(
                                     3'h2 : _alu_ctrl = ALU_SLT; 
                                     3'h3 : _alu_ctrl = ALU_SLTU;
                                 endcase
-                                _alu_src = SRC_IMM;
+                                _alu_sel_A = IMM_to_A;
+                                _alu_sel_B = RS1_to_B;
                                 _reg_write = 1;
                                 _mem_read = 0;
                                 _mem_write = 0;
@@ -162,7 +170,8 @@ module decode(
                                 _rd = instr[11:7];
                                 _imm = {8'b0, _funct7, instr[24:20]};
                                 _alu_ctrl = ALU_ADD;
-                                _alu_src = SRC_IMM;
+                                _alu_sel_A = IMM_to_A;
+                                _alu_sel_B = RS1_to_B;
                                 _reg_write = 1;
                                 _mem_read = 1;
                                 _mem_write = 0;
@@ -178,7 +187,6 @@ module decode(
                                 _jump_reg = 0;
                                 _lui = 0;
                                 _aupc = 0;
-    
                                 end
                 STORE : begin
                                 //S Type
@@ -187,7 +195,8 @@ module decode(
                                 _rd = 5'bxxxxx;
                                 _imm = {13'b0, _funct7};
                                 _alu_ctrl = ALU_ADD;
-                                _alu_src = SRC_IMM;
+                                _alu_sel_A = IMM_to_A;
+                                _alu_sel_B = RS1_to_B;
                                 _reg_write = 0;
                                 _mem_read = 0;
                                 _mem_write = 1;
@@ -201,7 +210,7 @@ module decode(
                                 _jump_reg = 0;
                                 _lui = 0;
                                 _aupc = 0;
-    
+                                //_multiop = 0;
                                 end
                 BRANCH : begin
                                 //B Type
@@ -217,7 +226,8 @@ module decode(
                                     3'h6 : _alu_ctrl = ALU_BLT;
                                     3'h7 : _alu_ctrl = ALU_BGET;
                                 endcase
-                                _alu_src = SRC_REG;
+                                _alu_sel_A = RS2_to_A;
+                                _alu_sel_B = RS1_to_B;
                                 _reg_write = 0;
                                 _mem_read = 0;
                                 _mem_write = 0;
@@ -227,6 +237,7 @@ module decode(
                                 _jump_reg = 0;
                                 _lui = 0;
                                 _aupc = 0;
+                                //_multiop = 1;
                                 end
                 JAL : begin
                                 //J Type jal
@@ -235,7 +246,8 @@ module decode(
                                 _rd = instr[11:7];
                                 _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
                                 _alu_ctrl = ALU_ADD;
-                                _alu_src = SRC_IMM;
+                                _alu_sel_A = 4_to_A;
+                                _alu_sel_B = PC_to_B;
                                 _reg_write = 1;
                                 _mem_read = 0;
                                 _mem_write = 0;
@@ -245,6 +257,7 @@ module decode(
                                 _jump_reg = 0;
                                 _lui = 0;
                                 _aupc = 0;
+                                //_multiop = 1;
                                 end
                 JALR : begin
                                 //I Type jalr
@@ -252,8 +265,8 @@ module decode(
                                 _rs2 = 5'bxxxxx;
                                 _rd = instr[11:7];
                                 _imm = {8'b0, _funct7, instr[24:20]};
-                                _alu_ctrl = ALU_ADD;
-                                _alu_src = SRC_IMM;
+                                _alu_sel_A = 4_to_A;
+                                _alu_sel_B = PC_to_B;
                                 _reg_write = 1;
                                 _mem_read = 0;
                                 _mem_write = 0;
@@ -263,6 +276,7 @@ module decode(
                                 _jump_reg = 1;
                                 _lui = 0;
                                 _aupc = 0;
+                                //_multiop = 1;
                                 end
                 LUI : begin
                                 //U Type lui
@@ -271,7 +285,8 @@ module decode(
                                 _rd = instr[11:7];
                                 _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
                                 _alu_ctrl = ALU_SLL;
-                                _alu_src = 1'bx;
+                                _alu_sel_A = IMM_to_A;
+                                _alu_sel_B = 12_to_B;
                                 _reg_write = 1;
                                 _mem_read = 0;
                                 _mem_write = 0;
@@ -281,6 +296,7 @@ module decode(
                                 _jump_reg = 0;
                                 _lui = 1;
                                 _aupc = 0;
+                                //_multiop = 0;
                                 end
                 AUIPC : begin
                                 //U Type aupc
@@ -289,8 +305,9 @@ module decode(
                                 _rd = instr[11:7];
                                 _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
                                 _alu_ctrl = ALU_SLL;
-                                _alu_src = 1'bx;
-                                _reg_write = 1;
+                                _alu_sel_A = IMM_to_A;
+                                _alu_sel_B = 12_to_B;
+                                _reg_write = 0;
                                 _mem_read = 0;
                                 _mem_write = 0;
                                 _mem_size = 2'bxx;
@@ -299,6 +316,7 @@ module decode(
                                 _jump_reg = 0;
                                 _lui = 0;
                                 _aupc = 1;
+                                //_multiop = 0;
                                 end
                 ENV : begin
                                 //I Type Environment Call
@@ -310,7 +328,7 @@ module decode(
                 _rd = 1'bx;
                 _imm = 1'bx;
                 _alu_ctrl = 1'bx;
-                _alu_src = 1'bx;
+                _alu_sel_A = 1'bx;
                 _reg_write = 1'bx;
                 _mem_read = 1'bx;
                 _mem_write = 1'bx;
@@ -320,11 +338,12 @@ module decode(
                 _jump_reg = 1'bx;
                 _lui = 1'bx;
                 _aupc = 1'bx;
+                //_multiop = 1'bx;
             end        
 //        rd <= _rd;
 //        imm <= _imm;
 //        alu_ctrl <= _alu_ctrl;
-//        alu_src <= _alu_src;
+//        _alu_sel_A <= _alu_sel_A;
 //        reg_write <= _reg_write;
 //        mem_read <= _mem_read;
 //        mem_write <= _mem_write;
@@ -340,7 +359,7 @@ module decode(
     assign rd = _rd;
     assign imm = _imm;
     assign alu_ctrl = _alu_ctrl;
-    assign alu_src = _alu_src;
+    assign alu_sel_A = _alu_sel_A;
     assign reg_write = _reg_write;
     assign mem_read = _mem_read;
     assign mem_write = _mem_write;
@@ -350,4 +369,5 @@ module decode(
     assign jump_reg = _jump_reg;
     assign lui = _lui;
     assign aupc = _aupc;
+    //assign multiop = _multiop;
 endmodule
