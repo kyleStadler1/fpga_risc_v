@@ -67,9 +67,9 @@ module decode_to_execute_reg_wall(
     output reg jump_reg,
     output reg lui, 
     output reg aupc,
-    output reg [31:0] pc_val
+    output reg [31:0] pc_val,
     output reg multiop,
-    output reg [31:0] alu_out,
+    output reg [31:0] alu_out
     ); 
     reg [1:0] ctr;
 
@@ -101,7 +101,7 @@ module decode_to_execute_reg_wall(
                 multiop <= 1'b0;
                 alu_out <= 32'bx;
             end else begin
-                if (!multiop_mop)
+                if (!multiop_mop) begin
                 rs1_val <= rs1_val_dec;
                 rs2_val <= rs2_val_dec;
                 rd <= rd_dec;
@@ -122,15 +122,16 @@ module decode_to_execute_reg_wall(
                 pc_val <= pc_val_in;
                 multiop <= 1'b0;
                 alu_out <= 32'bx;
-            end else begin
-                alu_ctrl <= alu_ctrl_mop;
-                alu_selA <= alu_selA_mop;
-                alu_selB <= alu_selB_mop;
-                reg_write <= reg_write_mop;
-                //mod_pc <= mod_pc_mop;
-                multiop <= multiop_mop;
-                alu_out <= alu_out_in;
-            end    
+                end else begin
+                    alu_ctrl <= alu_ctrl_in_mop;
+                    alu_selA <= alu_selA_mop;
+                    alu_selB <= alu_selB_mop;
+                    reg_write <= reg_write_in_mop;
+                    //mod_pc <= mod_pc_mop;
+                    multiop <= multiop_mop;
+                    alu_out <= alu_out_in;
+                end    
+            end
         end
     end
 

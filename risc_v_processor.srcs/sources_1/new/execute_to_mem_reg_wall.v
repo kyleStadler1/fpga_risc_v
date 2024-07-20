@@ -19,7 +19,7 @@ module execute_to_wb_reg_wall (
     output reg [1:0] mem_size,
     output reg [4:0] rd,
     output reg [31:0] alu_val,
-    output reg [31:0] rs2_val,
+    output reg [31:0] rs2_val
 );
 always @(posedge clk) begin
     if (en) begin

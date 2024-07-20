@@ -29,7 +29,7 @@ module decode(
     output  [19:0] imm,
     output  [3:0] alu_ctrl,
     output  [1:0] alu_sel_A,
-    output  [1:0] alu_sel_B;
+    output  [1:0] alu_sel_B,
     output  reg_write, 
     output  mem_read,
     output  mem_write,
@@ -38,7 +38,7 @@ module decode(
     output  jal,
     output  jalr,
     output  lui,
-    output  aupc,
+    output  aupc
    //output multiop
     );
     //alu ctrl 
@@ -61,10 +61,10 @@ module decode(
     //alu input src
     parameter RS2_to_A = 2'b00;
     parameter IMM_to_A = 2'b01;
-    parameter 4_to_A = 2'b10;
+    parameter four_to_A = 2'b10;
     parameter RS1_to_B = 2'b00;
     parameter PC_to_B = 2'b01;
-    parameter 12_to_B = 2'b10;
+    parameter twelve_to_B = 2'b10;
     //input instr Type
     parameter R_TYPE = 7'b0110011;
     parameter I_TYPE = 7'b0010011;
@@ -246,7 +246,7 @@ module decode(
                                 _rd = instr[11:7];
                                 _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
                                 _alu_ctrl = ALU_ADD;
-                                _alu_sel_A = 4_to_A;
+                                _alu_sel_A = four_to_A;
                                 _alu_sel_B = PC_to_B;
                                 _reg_write = 1;
                                 _mem_read = 0;
@@ -265,7 +265,7 @@ module decode(
                                 _rs2 = 5'bxxxxx;
                                 _rd = instr[11:7];
                                 _imm = {8'b0, _funct7, instr[24:20]};
-                                _alu_sel_A = 4_to_A;
+                                _alu_sel_A = four_to_A;
                                 _alu_sel_B = PC_to_B;
                                 _reg_write = 1;
                                 _mem_read = 0;
@@ -286,7 +286,7 @@ module decode(
                                 _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
                                 _alu_ctrl = ALU_SLL;
                                 _alu_sel_A = IMM_to_A;
-                                _alu_sel_B = 12_to_B;
+                                _alu_sel_B = twelve_to_B;
                                 _reg_write = 1;
                                 _mem_read = 0;
                                 _mem_write = 0;
@@ -306,7 +306,7 @@ module decode(
                                 _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
                                 _alu_ctrl = ALU_SLL;
                                 _alu_sel_A = IMM_to_A;
-                                _alu_sel_B = 12_to_B;
+                                _alu_sel_B = twelve_to_B;
                                 _reg_write = 0;
                                 _mem_read = 0;
                                 _mem_write = 0;

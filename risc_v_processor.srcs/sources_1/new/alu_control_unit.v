@@ -36,22 +36,28 @@ module alu_control_unit(
     );
     parameter RS2_to_A = 2'b00;
     parameter IMM_to_A = 2'b01;
-    parameter 4_to_A = 2'b10;
+    parameter four_to_A = 2'b10;
     parameter ALU_to_A = 2'b11;
     parameter RS1_to_B = 2'b00;
     parameter PC_to_B = 2'b01;
-    parameter 12_to_B = 2'b10;
+    parameter twelve_to_B = 2'b10;
     parameter ALU_to_B = 2'b11;
-    case(selA)
-        RS2_to_A : out_A = rs2_val;
-        IMM_to_A : out_A = {12'b0, imm};
-        4_to_A : out_A = 32'd4;
-        ALU_to_A : out_A = alu_val;
-    endcase
-    case(selB)
-        RS1_to_B : out_B = rs1_val;
-        PC_to_B : out_B = pc_val;
-        12_to_B : out_B = 32'd12;
-        ALU_to_B : out_B = alu_val;
-    endcase
+    reg [31:0] _A;
+    reg [31:0] _B;
+    always @(*) begin
+        case(selA)
+            RS2_to_A : _A = rs2_val;
+            IMM_to_A : _A = {12'b0, imm};
+            four_to_A : _A = 32'd4;
+            ALU_to_A : _A = alu_val;
+        endcase
+        case(selB)
+            RS1_to_B : _B = rs1_val;
+            PC_to_B : _B = pc_val;
+            twelve_to_B : _B = 32'd12;
+            ALU_to_B : _B = alu_val;
+        endcase
+        end
+        assign out_A = _A;
+        assign out_B = _B;
 endmodule

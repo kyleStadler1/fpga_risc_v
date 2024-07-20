@@ -45,88 +45,89 @@ module alu(
     parameter ALU_BGET = 4'b1111; 
     reg [31:0] _out;
     reg _branch;
-
-     case(alu_ctrl)
-        ALU_AND: begin
-            _out = A&B;
-            _branch = 0;
-        end
-        
-        ALU_OR: begin
-            _out = A|B;
-            _branch = 0;
-        end
-        
-        ALU_XOR: begin
-            _out = A^B;
-            _branch = 0;
-        end
-        
-        ALU_ADD: begin
-            _out = A+B; //add overflow later?
-            _branch = 0;
-        end
-        
-        ALU_SUB: begin
-            _out = B-A; //does it auto convert twos compliment cuz thats its own adder
-            _branch = 0;
-        end
-        
-        ALU_SLT: begin
-            _out = B < A ? 32'd1 : 32'd0;
-            _branch = 0;
-        end
-        
-        ALU_SLTU: begin
-            _out = B < A ? 32'd1 : 32'd0;
-            _branch = 0;
-        end
-        
-        ALU_SLL: begin
-            _out = B << A;
-            _branch = 0;
-        end
-        
-        ALU_SRL: begin
-            _out = A << B;
-            _branch = 0;
-        end
-        
-        ALU_SRA: begin
-            _out = B <<< A;
-            _branch = 0;
-        end
-        
-        ALU_NOR: begin
-            _out = ~(A | b) & 0xFFFFFFFF;
-            _branch = 0;
-        end
-        
-        ALU_LUI: begin
-            _out = A <<  B;
-            _branch = 0;
-        end
-        
-        ALU_BEQ: begin
-            _out = 32'bx;
-            _branch = (A^B) ? 0 : 1;
-        end
-        
-        ALU_BNE: begin
-            _out = 32'bx;
-            _branch = (A^B) ? 1 : 0;
-        end
-        
-        ALU_BLT: begin
-            _out = 32'bx;
-            _branch = B < A ? 1 : 0;
-        end
-        
-        ALU_BGET: begin
-            _out = 32'bx;
-            _branch = B >= A ? 1 : 0;
-        end
-    endcase
+    always @(*) begin
+         case(alu_ctrl)
+            ALU_AND: begin
+                _out = A&B;
+                _branch = 0;
+            end
+            
+            ALU_OR: begin
+                _out = A|B;
+                _branch = 0;
+            end
+            
+            ALU_XOR: begin
+                _out = A^B;
+                _branch = 0;
+            end
+            
+            ALU_ADD: begin
+                _out = A+B; //add overflow later?
+                _branch = 0;
+            end
+            
+            ALU_SUB: begin
+                _out = B-A; //does it auto convert twos compliment cuz thats its own adder
+                _branch = 0;
+            end
+            
+            ALU_SLT: begin
+                _out = B < A ? 32'd1 : 32'd0;
+                _branch = 0;
+            end
+            
+            ALU_SLTU: begin
+                _out = B < A ? 32'd1 : 32'd0;
+                _branch = 0;
+            end
+            
+            ALU_SLL: begin
+                _out = B << A;
+                _branch = 0;
+            end
+            
+            ALU_SRL: begin
+                _out = A << B;
+                _branch = 0;
+            end
+            
+            ALU_SRA: begin
+                _out = B <<< A;
+                _branch = 0;
+            end
+            
+            ALU_NOR: begin
+                _out = ~(A | B) & 32'hFFFFFFFF;
+                _branch = 0;
+            end
+            
+            ALU_LUI: begin
+                _out = A <<  B;
+                _branch = 0;
+            end
+            
+            ALU_BEQ: begin
+                _out = 32'bx;
+                _branch = (A^B) ? 0 : 1;
+            end
+            
+            ALU_BNE: begin
+                _out = 32'bx;
+                _branch = (A^B) ? 1 : 0;
+            end
+            
+            ALU_BLT: begin
+                _out = 32'bx;
+                _branch = B < A ? 1 : 0;
+            end
+            
+            ALU_BGET: begin
+                _out = 32'bx;
+                _branch = B >= A ? 1 : 0;
+            end
+        endcase
+    end
     assign out = _out;
     assign branch = _branch;
 endmodule

@@ -27,7 +27,7 @@ module multiop_controller(
     //input [3:0] alu_ctrl_in,
     input jump_in,
     input jump_reg_in,
-    input aupc_in,
+    input auipc_in,
     input multiop_in,
     output [3:0] alu_ctrl_out,
     output [1:0] alu_selA,
@@ -55,60 +55,67 @@ module multiop_controller(
 
     parameter RS2_to_A = 2'b00;
     parameter IMM_to_A = 2'b01;
-    parameter 4_to_A = 2'b10;
+    parameter four_to_A = 2'b10;
     parameter ALU_to_A = 2'b11;
     parameter RS1_to_B = 2'b00;
     parameter PC_to_B = 2'b01;
-    parameter 12_to_B = 2'b10;
+    parameter twelve_to_B = 2'b10;
     parameter ALU_to_B = 2'b11;
+    
+    reg [3:0] _alu_ctrl_out;
+    reg [1:0] _alu_selA;
+    reg [1:0] _alu_selB;
+    reg _reg_write_out;
+    reg _mod_pc; 
+    reg _multiop_out;
 
-
-    case(multiop_in)
-        1'b0 : begin
-            if (branch_in) begin
-                if (alu_branch) begin
-                    alu_selA = IMM_to_A;
-                    alu_selB = PC_to_B;
-                    alu_ctrl_out = ALU_ADD;
-                    mod_pc = 1;
-                    multiop_out = 1;
-                end else begin
-                    mod_pc = 0;
-                    multiop_out = 0;
-                end
+    always @(*) begin
+        case(multiop_in)
+            1'b0 : begin
+                    if (alu_branch) begin
+                        _alu_selA = IMM_to_A;
+                        _alu_selB = PC_to_B;
+                        _alu_ctrl_out = ALU_ADD;
+                        _mod_pc = 1;
+                        _multiop_out = 1;
+                    end   
+                    else if (jump_in) begin
+                        _alu_selA = IMM_to_A;
+                        _alu_selB = PC_to_B;
+                        _alu_ctrl_out = ALU_ADD;
+                        _mod_pc = 1;
+                        _multiop_out = 1;
+                    end
+                    else if (jump_reg_in) begin
+                        _alu_selA = IMM_to_A;
+                        _alu_selB = RS1_to_B;
+                        _alu_ctrl_out = ALU_ADD;
+                        _mod_pc = 1;
+                        _multiop_out = 1;
+                    end 
+                    else if (auipc_in) begin
+                        _alu_selA = ALU_to_A;
+                        _alu_selB = PC_to_B;
+                        _alu_ctrl_out = ALU_ADD;
+                        _reg_write_out = 1;
+                        _multiop_out = 1;
+                    end
+                    else begin
+                        _multiop_out = 0;
+                        _mod_pc = 0; 
+                    end
             end
-            else if (jump_in) begin
-                alu_selA = IMM_to_A;
-                alu_selB = PC_to_B;
-                alu_ctrl_out = ALU_ADD;
-                mod_pc = 1;
-                multiop_out = 1;
+            1'b1 : begin
+                _multiop_out = 0;
+                _mod_pc = 0;
+                _reg_write_out = 0;
             end
-            else if (jump_reg_in) begin
-                alu_selA = IMM_to_A;
-                alu_selB = RS1_to_B;
-                alu_ctrl_out = ALU_ADD;
-                mod_pc = 1;
-                multiop_out = 1;
-            end 
-            else if (auipc_in) begin
-                alu_sel_A = ALU_to_A;
-                alu_selB = PC_to_B;
-                alu_ctrl_out = ALU_ADD;
-                reg_write_out = 1;
-                multiop_out = 1;
-            end
-            else begin
-                multiop_out = 0;
-                mod_pc = 0; 
-            end
-        end
-        1'b1 : begin
-            multiop_out = 0;
-            mod_pc = 0;
-            reg_write_out = 0;
-        end
-    endcase
-
-
+        endcase
+    end
+    assign alu_ctrl_out = _alu_ctrl_out;
+    assign alu_selA = _alu_selA;
+    assign alu_selB = _alu_selB;
+    assign reg_write_out = _reg_write_out;
+    assign mod_pc = _mod_pc;
+    assign multiop_out = _multiop_out;
 endmodule

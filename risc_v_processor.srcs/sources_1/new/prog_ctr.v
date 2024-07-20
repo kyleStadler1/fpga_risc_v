@@ -26,7 +26,7 @@ module prog_ctr(
     input rst,
     input[31:0] alu_output, //msb represents sign, in units of instruction offset (units = 4bytes)
     input sel, // 0 is +4, 1 is take from alu
-    output wire [31:0] instr_byteAddr //unit is byte address, lsb should always be 0
+    output wire [31:0] pc_val //unit is byte address, lsb should always be 0
     );
     parameter RST_VECT = 32'h0;
     reg[31:0] curr_instr; 
@@ -45,6 +45,6 @@ module prog_ctr(
             curr_instr <= next_instr;
         end
     end
-    assign instr_byteAddr = curr_instr;
+    assign pc_val = curr_instr;
 endmodule
 
