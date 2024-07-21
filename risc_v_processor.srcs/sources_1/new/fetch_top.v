@@ -32,10 +32,18 @@ module fetch_top(
         .dout(instruction),
         .read_valid(instr_valid)
     );
+
+    fetch_to_decode_reg_wall(
+        .clk(clk),
+        .en(en),
+        .pc_val_in(_pc_val),
+        .pc_val(pc_val)
+    );
+
     
-    always @(posedge clk) begin
-        pc_val_p0 <= _pc_val;
-        pc_val_p1 <= pc_val_p0;
-    end
-    assign pc_val = pc_val_p1;
+    // always @(posedge clk) begin
+    //     pc_val_p0 <= _pc_val;
+    //     pc_val_p1 <= pc_val_p0;
+    // end
+    // assign pc_val = pc_val_p1;
 endmodule

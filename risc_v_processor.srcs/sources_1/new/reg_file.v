@@ -30,6 +30,7 @@ module reg_file( //2 read statges 2 write stages
         input wen_B,
         input [4:0] write_addr_B,
         input [31:0] din_B,
+        input [1:0] size_B;
         output [31:0] dout_A,
         output [31:0] dout_B
     );
@@ -40,7 +41,12 @@ module reg_file( //2 read statges 2 write stages
             reg_file[write_addr_A] <= din_A;
         end
         if (wen_B) begin
-            reg_file[write_addr_B] <= din_B;
+            case(size_B)
+            2'b01 : reg_file[write_addr_B] <= (din_B & 32'h000000ff);
+            2'b10 : reg_file[write_addr_B] <= (din_B & 32'h0000ffff);
+            2'b11 : reg_file[write_addr_B] <= (din_B);
+            endcase
+            
         end
     end
     assign dout_A = reg_file[read_addr_A];

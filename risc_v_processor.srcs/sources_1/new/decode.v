@@ -33,7 +33,7 @@ module decode(
     output  reg_write, 
     output  mem_read,
     output  mem_write,
-    output  [3:0] mem_size,
+    output  [1:0] mem_size,
     output  branch,
     output  jal,
     output  jalr,

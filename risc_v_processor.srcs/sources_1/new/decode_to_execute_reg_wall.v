@@ -44,7 +44,7 @@ module decode_to_execute_reg_wall(
     input [3:0] alu_ctrl_in_mop,
     input [1:0] alu_selA_mop,
     input [1:0] alu_selB_mop,
-    input reg_write_in_mop,
+    //input reg_write_in_mop,
     input mod_pc_mop,
     input multiop_mop,
     input [31:0] alu_out_in,
@@ -126,7 +126,7 @@ module decode_to_execute_reg_wall(
                     alu_ctrl <= alu_ctrl_in_mop;
                     alu_selA <= alu_selA_mop;
                     alu_selB <= alu_selB_mop;
-                    reg_write <= reg_write_in_mop;
+                    //reg_write <= reg_write_in_mop;
                     //mod_pc <= mod_pc_mop;
                     multiop <= multiop_mop;
                     alu_out <= alu_out_in;
