@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module store_load_top (
     input clk,
     input en,

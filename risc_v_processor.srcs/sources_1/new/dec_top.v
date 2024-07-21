@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module dec_top (
     input clk, 
     input [31:0] instruction,

@@ -33,7 +33,7 @@ module blk_mem_top(
     reg prev_op;
     reg prev_prev_op;
     reg [3:0] write_mask;
-    reg [31:0] raw_dout;
+    wire [31:0] raw_dout;
     reg [31:0] _dout;
     blk_mem_gen M_d(clk, write_mask, addr, din, raw_dout);
 

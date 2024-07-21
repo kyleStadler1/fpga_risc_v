@@ -37,6 +37,7 @@ module reg_file( //2 read statges 2 write stages
     
     reg [31:0] reg_file [31:0];
     always @(posedge clk) begin
+        reg_file[32'd0] = 32'd0;
         if (wen_A) begin
             reg_file[write_addr_A] <= din_A;
         end

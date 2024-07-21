@@ -1,9 +1,10 @@
+`timescale 1ns / 1ps
 module top_top (
     input  clk,
     output [9:0] led
 );
     //Write to instruction memory wires - ALL NEED TO BE DRIVEN BY USER
-    wire instr_write_en;
+    wire instr_write_en = 0;
     wire [31:0] instr_addr;
     wire [31:0] instr_data;
     //regfile output wires
@@ -80,14 +81,14 @@ module top_top (
         .dma_instr_write_data(instr_data),
         //outputs
         .instruction(instruction),
-        .instruction_valid(),
+        .instr_valid(),
         .pc_val(pc_val_fetch)
     );
     dec_top decode(
         //inputs
         .clk(clk),
-        .instruciton(instruction),
-        .en(decode_en),
+        .instruction(instruction),
+        .en(decode_en&instr_write_en),
         .rs1_val_in(dout_A),
         .rs2_val_in(dout_B),
         //outputs
@@ -113,7 +114,7 @@ module top_top (
     exec_top execute (
         //inputs
         .clk(clk),
-        .en(execute_en),
+        .en(execute_en&instr_write_en),
         .rs1_val_in(rs1_val), 
         .rs2_val_in(rs2_val_dec), 
         .rd_in(rd_dec),
@@ -144,7 +145,7 @@ module top_top (
     store_load_top storeload(
         //inputs
         .clk(clk),
-        .en(storeload_en),
+        .en(storeload_en&instr_write_en),
         .mem_read(mem_read_ex),
         .mem_write(mem_write_ex),
         .mem_size(mem_size_ex),
@@ -162,27 +163,39 @@ module top_top (
         .dinB(dinB)
     );
 
+    
+//    parameter instruction_count = 20;
+//    reg [31:0] mi [0 : instruction_count-1];
+
+    
+
+//    reg [31:0] ctr = 0;
+//    always @(posedge clk) begin
+//        ctr <= ctr+1;
+//        if (ctr == 0) begin
+//            instr_write_en = 1;
+//            mi[0] <= 32'h00600093;
+//            mi[1] <= 32'h00700113;
+//            mi[2] <= 32'h002081b3;
+//        end
+//        if (ctr > 0 && ctr < 4) begin
+//            instr_write_en = 1;
+//            instr_addr = ctr - 1;
+//            instr_data = mi[ctr - 1];
+//        end
+//        if (ctr >= 4) begin
+//            instr_write_en = 0;
+//        end
+//    end
+
+
+
+
+
+
+
+
     //IO
-    assign led = alu_val[9:0];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    assign led[9:0] = alu_val[9:0];
 
 endmodule

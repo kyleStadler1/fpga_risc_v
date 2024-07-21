@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module fetch_top(
     input clk,
     input [31:0] branch_vect,
@@ -14,7 +15,7 @@ module fetch_top(
     wire [31:0] _pc_val;
     reg [31:0] pc_val_p0;
     reg [31:0] pc_val_p1;
-    prog_ctr(
+    prog_ctr pc(
         .clk(clk),
         .en(!dma_instr_write_en),
         .rst(1'b0),
@@ -32,7 +33,7 @@ module fetch_top(
         .read_valid(instr_valid)
     );
 
-    fetch_to_decode_reg_wall(
+    fetch_to_decode_reg_wall wall(
         .clk(clk),
         .en(!dma_instr_write_en),
         .pc_val_in(_pc_val),

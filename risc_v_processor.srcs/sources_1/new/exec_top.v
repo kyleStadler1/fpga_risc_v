@@ -1,6 +1,5 @@
+`timescale 1ns / 1ps
 module exec_top (
-    input clk,
-    input en,
     input clk,
     input en,
     input [31:0] rs1_val_in, 
@@ -54,7 +53,6 @@ module exec_top (
     wire mod_pc_mop;
     wire multiop_mop;
     
-    wire mem_read_latched;
     wire mem_read_latched;
     wire [1:0] mem_size_latched;
     wire reg_write_latched;
