@@ -29,8 +29,7 @@ module dec_top (
     decode decode(
         .clk(clk),
         .instr(instruction),
-        .en(en)
-
+        .en(en),
         .rs1(rs1),
         .rs2(rs2),
         .rd(rd),
@@ -43,7 +42,7 @@ module dec_top (
         .mem_write(mem_write),
         .mem_size(mem_size),
         .branch(branch),
-        ,jal(jal),
+        .jal(jal),
         .jalr(jalr),
         .lui(lui),
         .aupc(aupc)

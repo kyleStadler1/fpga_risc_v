@@ -15,12 +15,9 @@ module store_load_top (
     output [31:0] dinA,
 
     output reg_writeB_en,
-    output [1:0] size_B;
+    output [1:0] size_B,
     output [4:0] rdB,
-    output [31:0] dinB,
- 
-
-
+    output [31:0] dinB
 );
     wire read_valid;
 
@@ -47,7 +44,7 @@ module store_load_top (
             rd_p1 <= rd_p0;
             mem_read_p0 <= mem_read;
             mem_read_p1 <= mem_read_p0;
-            mem_size_p0 <= size_read;
+            mem_size_p0 <= mem_size;
             mem_size_p1 <= mem_size_p0;
 
         end

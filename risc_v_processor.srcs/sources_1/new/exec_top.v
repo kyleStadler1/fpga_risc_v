@@ -3,23 +3,23 @@ module exec_top (
     input en,
     input clk,
     input en,
-    input [31:0] rs1_val, 
-    input [31:0] rs2_val, 
-    input [4:0] rd,
+    input [31:0] rs1_val_in, 
+    input [31:0] rs2_val_in, 
+    input [4:0] rd_in,
     input [19:0] imm,
     input [3:0] alu_ctrl,
     input [1:0] alu_sel_A,
     input [1:0] alu_sel_B,
-    input reg_write, 
-    input mem_read,
-    input mem_write,
-    input [1:0] mem_size,
+    input reg_write_in, 
+    input mem_read_in,
+    input mem_write_in,
+    input [1:0] mem_size_in,
     input branch,
     input jal,
     input jalr,
     input lui,
     input aupc,
-    input [31:0] pc_val
+    input [31:0] pc_val,
 
     output reg mod_pc,
     output reg mem_read,
@@ -31,11 +31,40 @@ module exec_top (
     output reg [31:0] rs2_val
 );
 
+    wire [31:0] rs2_val_latched;
+    wire [19:0] imm_latched;
+    wire [31:0] rs1_val_latched;
+    wire [31:0] pc_val_latched;
+    wire [31:0] alu_val_latched;
+    wire [1:0] selA_latched;
+    wire [1:0] selB_latched;
+    
+    wire [3:0] alu_ctrl_latched;
+    wire [31:0] alu_out;
+    
+    wire jal_mop;
+    wire jalr_mop;
+    wire auipc_mop;
+    wire mop_in;
+    
+    wire [3:0] alu_ctrl_mop;
+    wire [1:0] selA_mop;
+    wire [1:0] selB_mop;
+    wire reg_write_mop;
+    wire mod_pc_mop;
+    wire multiop_mop;
+    
+    wire mem_read_latched;
+    wire mem_read_latched;
+    wire [1:0] mem_size_latched;
+    wire reg_write_latched;
+    wire [4:0] rd_latched;
+
     decode_to_execute_reg_wall dtoex (
         .clk(clk),
         .en(en),
-        .rs1_val_dec(rs1_val),
-        .rs2_val_dec(rs2_val),
+        .rs1_val_dec(rs1_val_in),
+        .rs2_val_dec(rs2_val_in),
         .rd_dec(rd),
         .imm_dec(imm),
         .alu_ctrl_dec(alu_ctrl),
@@ -82,13 +111,7 @@ module exec_top (
         .alu_out(alu_val_latched)
     );
 
-    wire [31:0] rs2_val_latched;
-    wire [19:0] imm_latched;
-    wire [31:0] rs1_val_latched;
-    wire [31:0] pc_val_latched;
-    wire [31:0] alu_val_latched;
-    wire [1:0] selA_latched;
-    wire [1:0] selB_latched;
+
     wire [31:0] out_A;
     wire [31:0] out_B;
     alu_control_unit acu(
@@ -103,30 +126,21 @@ module exec_top (
         .out_B(out_B)
     );
 
-    wire [3:0] alu_ctrl_latched;
-    wire [31:0] alu_out;
+
     wire branch_conf;
     alu alu(
         .alu_ctrl(alu_ctrl_latched),
         .A(out_A),
         .B(out_B),
-        .alu_out(alu_out)
+        .alu_out(alu_out),
         .branch(branch_conf)
     );
 
-    wire jal_mop;
-    wire jalr_mop;
-    wire auipc_mop;
-    wire mop_in;
 
-    wire [3:0] alu_ctrl_mop;
-    wire [1:0] selA_mop;
-    wire [1:0] selB_mop;
-    wire reg_write_mop;
-    wire mod_pc_mop;
-    wire multiop_mop;
+
+
     multiop_controller mop(
-        .alu_branch(branch_conf);
+        .alu_branch(branch_conf),
         .jump_in(jal_mop),
         .auipc_in(auipc_mop),
         .multiop_in(mop_in),
@@ -138,11 +152,7 @@ module exec_top (
         .multiop_out(multiop_mop)
     );
 
-    wire mem_read_latched;
-    wire mem_read_latched;
-    wire [1:0] mem_size_latched;
-    wire reg_write_latched;
-    wire [4:0] rd_latched;
+
     always @(posedge clk) begin
         mod_pc <= mod_pc_mop;
         mem_read <= mem_read_latched;

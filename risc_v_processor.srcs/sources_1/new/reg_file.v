@@ -30,7 +30,7 @@ module reg_file( //2 read statges 2 write stages
         input wen_B,
         input [4:0] write_addr_B,
         input [31:0] din_B,
-        input [1:0] size_B;
+        input [1:0] size_B,
         output [31:0] dout_A,
         output [31:0] dout_B
     );
