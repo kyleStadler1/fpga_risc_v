@@ -154,13 +154,15 @@ module exec_top (
 
 
     always @(posedge clk) begin
-        mod_pc <= mod_pc_mop;
-        mem_read <= mem_read_latched;
-        mem_write <= mem_read_latched;
-        mem_size <= mem_size_latched;
-        reg_write <= multiop_mop ? reg_write_mop : reg_write_latched;
-        rd <= rd_latched;
-        alu_val <= alu_out;
-        rs2_val <= rs2_val_latched;
+        if (en) begin
+            mod_pc <= mod_pc_mop;
+            mem_read <= mem_read_latched;
+            mem_write <= mem_read_latched;
+            mem_size <= mem_size_latched;
+            reg_write <= multiop_mop ? reg_write_mop : reg_write_latched;
+            rd <= rd_latched;
+            alu_val <= alu_out;
+            rs2_val <= rs2_val_latched;
+        end
     end
 endmodule

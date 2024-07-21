@@ -1,7 +1,6 @@
 module store_load_top (
     input clk,
     input en,
-    input mod_pc,
     input mem_read,
     input mem_write,
     input [1:0] mem_size,

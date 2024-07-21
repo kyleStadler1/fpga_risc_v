@@ -1,12 +1,11 @@
 module fetch_top(
     input clk,
-    input en,
     input [31:0] branch_vect,
     input branch_en,
     
     input dma_instr_write_en,
-    input [31:0] dma_instr_write_data,
     input [31:0] dma_instr_addr,
+    input [31:0] dma_instr_write_data,
     
     output [31:0] instruction,
     output instr_valid,
@@ -17,7 +16,7 @@ module fetch_top(
     reg [31:0] pc_val_p1;
     prog_ctr(
         .clk(clk),
-        .en(en),
+        .en(!dma_instr_write_en),
         .rst(1'b0),
         .branch_vect(branch_vect),
         .sel(branch_en),
@@ -35,7 +34,7 @@ module fetch_top(
 
     fetch_to_decode_reg_wall(
         .clk(clk),
-        .en(en),
+        .en(!dma_instr_write_en),
         .pc_val_in(_pc_val),
         .pc_val(pc_val)
     );
