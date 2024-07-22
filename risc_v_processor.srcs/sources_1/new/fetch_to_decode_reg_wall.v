@@ -31,6 +31,7 @@ module fetch_to_decode_reg_wall( //double wide reg wall!!!
         if (en) begin
             pc_val_intermediate <= pc_val_in;
             pc_val <= pc_val_intermediate;
+            //pc_val <= pc_val_in;
         end    
     end
 endmodule

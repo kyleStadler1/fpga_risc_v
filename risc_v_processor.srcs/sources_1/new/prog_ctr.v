@@ -29,8 +29,8 @@ module prog_ctr(
     output wire [31:0] pc_val //unit is byte address, lsb should always be 0
     );
     parameter RST_VECT = 32'h0;
-    reg[31:0] curr_instr; 
-    reg[31:0] next_instr;
+    reg[31:0] curr_instr = 32'h0; 
+    reg[31:0] next_instr = 32'h0;
     initial begin
         curr_instr = RST_VECT;
     end
@@ -40,7 +40,8 @@ module prog_ctr(
         end else if (en) begin
             case(sel)
                 1'b1 : next_instr = branch_vect;
-                2'b00 : next_instr = curr_instr + 3'b100; //next 
+                1'b0 : next_instr = curr_instr + 3'b100; //next 
+                default : next_instr = 32'd999;
             endcase
             curr_instr <= next_instr;
         end
