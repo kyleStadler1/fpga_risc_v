@@ -31,8 +31,10 @@ module reg_file( //2 read statges 2 write stages
         input [4:0] write_addr_B,
         input [31:0] din_B,
         input [1:0] size_B,
+        input [4:0] read_addr_C,
         output [31:0] dout_A,
-        output [31:0] dout_B
+        output [31:0] dout_B,
+        output [31:0] dout_C
     );
     
     reg [31:0] reg_file [31:0];
@@ -52,4 +54,5 @@ module reg_file( //2 read statges 2 write stages
     end
     assign dout_A = reg_file[read_addr_A];
     assign dout_B = reg_file[read_addr_B];
+    assign dout_C = reg_file[read_addr_C];
 endmodule
