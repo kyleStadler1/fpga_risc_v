@@ -10,13 +10,11 @@ module tb_decode;
     wire dma_instr_en;
     wire [31:0] dma_instr_addr;
     wire [31:0] dma_instr_data;
-    
-    wire decode_en = 1;
-    wire instr_valid;
 
+    wire [31:0] instruction;
+    wire instruction_valid;
+    wire [31:0] pc_val;
 
-    wire [31:0] instruction; //fetch.instruction -> dec.instruction
-    wire [31:0] pc_val_fetch; //fetch.pc_val -> exec.pc_val
     //decode output wires
 //    wire [4:0] rs1;
 //    wire [4:0] rs2;
@@ -45,46 +43,46 @@ module tb_decode;
     );
 
 
-    fetch_top fetch(
+     fetch_top fetch(
         //inputs
         .clk(clk),
         .branch_vect(branch_vect),
         .branch_en(branch_en),
         .dma_instr_write_en(dma_instr_en),
-        .dma_instr_addr(instr_addr),
-        .dma_instr_write_data(instr_data),
+        .dma_instr_addr(dma_instr_addr),
+        .dma_instr_write_data(dma_instr_data),
         //outputs
         .instruction(instruction),
-        .instr_valid(instr_valid),
-        .pc_val(pc_val_fetch)
+        .instr_valid(instruction_valid),
+        .pc_val(pc_val)
     );
-//    dec_top decode(
-//        //inputs
-//        .clk(clk),
-//        .instruction(instruction),
-//        .en(decode_en&!dma_instr_en),
-//        .rs1_val_in(dout_A),
-//        .rs2_val_in(dout_B),
-//        //outputs
-//        .rs1(rs1),
-//        .rs2(rs2),
-//        .rs1_val(rs1_val),
-//        .rs2_val(rs2_val_dec),
-//        .rd(rd_dec),
-//        .imm(imm),
-//        .alu_ctrl(alu_ctrl),
-//        .alu_sel_A(alu_sel_A),
-//        .alu_sel_B(alu_sel_B),
-//        .reg_write(reg_write_dec),
-//        .mem_read(mem_read_dec),
-//        .mem_write(mem_write_dec),
-//        .mem_size(mem_size_dec),
-//        .branch(branch),
-//        .jal(jal),
-//        .jalr(jalr),
-//        .lui(lui),
-//        .aupc(aupc)
-//    );
+   dec_top decode(
+       //inputs
+       .clk(clk),
+       .instruction(instruction),
+       .en(1'b1),
+       .rs1_val_in(dout_A),
+       .rs2_val_in(dout_B),
+       //outputs
+       .rs1(rs1),
+       .rs2(rs2),
+       .rs1_val(rs1_val),
+       .rs2_val(rs2_val_dec),
+       .rd(rd_dec),
+       .imm(imm),
+       .alu_ctrl(alu_ctrl),
+       .alu_sel_A(alu_sel_A),
+       .alu_sel_B(alu_sel_B),
+       .reg_write(reg_write_dec),
+       .mem_read(mem_read_dec),
+       .mem_write(mem_write_dec),
+       .mem_size(mem_size_dec),
+       .branch(branch),
+       .jal(jal),
+       .jalr(jalr),
+       .lui(lui),
+       .aupc(aupc)
+   );
     
     always begin
         #20 clk <= clk + 1;
