@@ -66,7 +66,7 @@ module multiop_controller(
     reg [1:0] _alu_selA;
     reg [1:0] _alu_selB;
     reg _reg_write_out;
-    reg _mod_pc; 
+    reg _mod_pc = 0; 
     reg _multiop_out;
 
     always @(*) begin

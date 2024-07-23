@@ -35,6 +35,9 @@ module tb_decode;
    wire lui;
    wire aupc;
 
+
+   wire [6:0] debug;
+
     instr_writer writer(
         .clk(clk),
         .instr_write_en(dma_instr_en),
@@ -81,7 +84,8 @@ module tb_decode;
        .jal(jal),
        .jalr(jalr),
        .lui(lui),
-       .aupc(aupc)
+       .aupc(aupc),
+       .debug(debug)
    );
     
     always begin

@@ -24,7 +24,8 @@ module dec_top (
     output  jal,
     output  jalr,
     output  lui,
-    output  aupc
+    output  aupc,
+    output [6:0] debug
 );
     decode decode(
         .clk(clk),
@@ -45,7 +46,8 @@ module dec_top (
         .jal(jal),
         .jalr(jalr),
         .lui(lui),
-        .aupc(aupc)
+        .aupc(aupc),
+        .debug(debug)
     );
     assign rs1_val = rs1_val_in;
     assign rs2_val = rs2_val_in;

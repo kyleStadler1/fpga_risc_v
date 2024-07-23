@@ -1,18 +1,17 @@
 Vivado Simulator v2023.2
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
 Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
-Running: C:/Xilinx/Vivado/2023.2/bin/unwrapped/win64.o/xelab.exe --incr --debug typical --relax --mt 2 -L xil_defaultlib -L blk_mem_gen_v8_4_7 -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot tb_decode_behav xil_defaultlib.tb_decode xil_defaultlib.glbl -log elaborate.log 
+Running: C:/Xilinx/Vivado/2023.2/bin/unwrapped/win64.o/xelab.exe --incr --debug typical --relax --mt 2 -L xil_defaultlib -L blk_mem_gen_v8_4_7 -L unisims_ver -L unimacro_ver -L secureip -L xpm --snapshot tb_top_behav xil_defaultlib.tb_top xil_defaultlib.glbl -log elaborate.log 
 Using 2 slave threads.
 Starting static elaboration
 Pass Through NonSizing Optimizer
-WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 14 for port 'addr' [C:/Users/Kyle/blackboard/risc_v_processor/risc_v_processor.srcs/sources_1/new/fetch_top.v:28]
-WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 14 for port 'addra' [C:/Users/Kyle/blackboard/risc_v_processor/risc_v_processor.srcs/sources_1/new/instr_blk_mem_top.v:34]
-WARNING: [VRFC 10-3091] actual bit length 1 differs from formal bit length 32 for port 'rs1_val_in' [C:/Users/Kyle/blackboard/risc_v_processor/risc_v_processor.srcs/pipe_stage_sims/new/tb_decode.v:64]
-WARNING: [VRFC 10-3091] actual bit length 1 differs from formal bit length 32 for port 'rs2_val_in' [C:/Users/Kyle/blackboard/risc_v_processor/risc_v_processor.srcs/pipe_stage_sims/new/tb_decode.v:65]
+WARNING: [VRFC 10-3091] actual bit length 1 differs from formal bit length 32 for port 'rs2_val' [C:/Users/Kyle/blackboard/risc_v_processor/risc_v_processor.srcs/pipe_stage_sims/new/tb_top.v:191]
+WARNING: [VRFC 10-3091] actual bit length 32 differs from formal bit length 15 for port 'addr' [C:/Users/Kyle/blackboard/risc_v_processor/risc_v_processor.srcs/sources_1/new/store_load_top.v:29]
 Completed static elaboration
 Starting simulation data flow analysis
 Completed simulation data flow analysis
 Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.reg_file
 Compiling module xil_defaultlib.instr_writer
 Compiling module xil_defaultlib.prog_ctr
 Compiling module blk_mem_gen_v8_4_7.blk_mem_gen_v8_4_7_output_stage(...
@@ -25,6 +24,18 @@ Compiling module xil_defaultlib.fetch_to_decode_reg_wall
 Compiling module xil_defaultlib.fetch_top
 Compiling module xil_defaultlib.decode
 Compiling module xil_defaultlib.dec_top
-Compiling module xil_defaultlib.tb_decode
+Compiling module xil_defaultlib.decode_to_execute_reg_wall
+Compiling module xil_defaultlib.alu_control_unit
+Compiling module xil_defaultlib.alu
+Compiling module xil_defaultlib.multiop_controller
+Compiling module xil_defaultlib.exec_top
+Compiling module blk_mem_gen_v8_4_7.blk_mem_gen_v8_4_7_output_stage(...
+Compiling module blk_mem_gen_v8_4_7.blk_mem_gen_v8_4_7_softecc_outpu...
+Compiling module blk_mem_gen_v8_4_7.blk_mem_gen_v8_4_7_mem_module(C_...
+Compiling module blk_mem_gen_v8_4_7.blk_mem_gen_v8_4_7(C_FAMILY="zyn...
+Compiling module xil_defaultlib.blk_mem_gen
+Compiling module xil_defaultlib.blk_mem_top
+Compiling module xil_defaultlib.store_load_top
+Compiling module xil_defaultlib.tb_top
 Compiling module xil_defaultlib.glbl
-Built simulation snapshot tb_decode_behav
+Built simulation snapshot tb_top_behav

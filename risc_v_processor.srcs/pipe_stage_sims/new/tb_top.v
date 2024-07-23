@@ -37,6 +37,7 @@ module tb_top;
     //fetch output wires
     wire [31:0] instruction; //fetch.instruction -> dec.instruction
     wire [31:0] pc_val_fetch; //fetch.pc_val -> exec.pc_val
+    wire instr_valid;
     //decode output wires
     wire [4:0] rs1;
     wire [4:0] rs2;
@@ -77,13 +78,9 @@ module tb_top;
     wire decode_en = 1;
     wire execute_en = 1;
     wire storeload_en = 1;
+    
+    wire [6:0] debug;
 
-    instr_writer writer(
-        .clk(clk),
-        .instr_write_en(instr_write_en),
-        .addr(dma_instr_addr),
-        .data(dma_instr_data)
-    );
     reg_file regfile (
         //inputs
         .clk(clk),
@@ -102,97 +99,110 @@ module tb_top;
         .dout_B(dout_B),
         .dout_C(IO_out)
     );
-    fetch_top fetch(
+    instr_writer writer(
+        .clk(clk),
+        .instr_write_en(dma_instr_en),
+        .addr(dma_instr_addr),
+        .data(dma_instr_data)
+    );
+
+
+     fetch_top fetch(
         //inputs
         .clk(clk),
-        .branch_vect(alu_val),
-        .branch_en(mod_pc),
-        .dma_instr_write_en(instr_write_en),
-        .dma_instr_addr(instr_addr),
-        .dma_instr_write_data(instr_data),
+        .branch_vect(32'bx),
+        .branch_en(1'b0),
+        .dma_instr_write_en(dma_instr_en),
+        .dma_instr_addr(dma_instr_addr),
+        .dma_instr_write_data(dma_instr_data),
         //outputs
         .instruction(instruction),
-        .instr_valid(),
+        .instr_valid(instr_valid),
         .pc_val(pc_val_fetch)
     );
-    dec_top decode(
-        //inputs
-        .clk(clk),
-        .instruction(instruction),
-        .en(decode_en&~instr_write_en),
-        .rs1_val_in(dout_A),
-        .rs2_val_in(dout_B),
-        //outputs
-        .rs1(rs1),
-        .rs2(rs2),
-        .rs1_val(rs1_val),
-        .rs2_val(rs2_val_dec),
-        .rd(rd_dec),
-        .imm(imm),
-        .alu_ctrl(alu_ctrl),
-        .alu_sel_A(alu_sel_A),
-        .alu_sel_B(alu_sel_B),
-        .reg_write(reg_write_dec),
-        .mem_read(mem_read_dec),
-        .mem_write(mem_write_dec),
-        .mem_size(mem_size_dec),
-        .branch(branch),
-        .jal(jal),
-        .jalr(jalr),
-        .lui(lui),
-        .aupc(aupc)
-    );
-    exec_top execute (
-        //inputs
-        .clk(clk),
-        .en(execute_en&~instr_write_en),
-        .rs1_val_in(rs1_val), 
-        .rs2_val_in(rs2_val_dec), 
-        .rd_in(rd_dec),
-        .imm(imm),
-        .alu_ctrl(alu_ctrl),
-        .alu_sel_A(alu_sel_A),
-        .alu_sel_B(alu_sel_B),
-        .reg_write_in(reg_write_dec), 
-        .mem_read_in(mem_read_dec),
-        .mem_write_in(mem_write_dec),
-        .mem_size_in(mem_size_dec),
-        .branch(branch),
-        .jal(jal),
-        .jalr(jalr),
-        .lui(lui),
-        .aupc(aupc),
-        .pc_val(pc_val_fetch),
-        //outputs
-        .mod_pc(mod_pc),
-        .mem_read(mem_read_ex),
-        .mem_write(mem_write_ex),
-        .mem_size(mem_size_ex),
-        .reg_write(reg_write_ex),
-        .rd(rd_ex),
-        .alu_val(alu_val),
-        .rs2_val(rs2_val_ex)
-    );
-    store_load_top storeload(
-        //inputs
-        .clk(clk),
-        .en(storeload_en&~instr_write_en),
-        .mem_read(mem_read_ex),
-        .mem_write(mem_write_ex),
-        .mem_size(mem_size_ex),
-        .rd(rd_ex),
-        .alu_val(alu_val),
-        .rs2_val(rs2_val),
-        .reg_write(reg_write_ex),
-        //outputs
-        .reg_writeA_en(reg_writeA_en),
-        .rdA(rdA),
-        .dinA(dinA),
-        .reg_writeB_en(reg_writeB_en),
-        .size_B(size_B),
-        .rdB(rdB),
-        .dinB(dinB)
-    );
+     dec_top decode(
+         //inputs
+         .clk(clk),
+         .instruction(instruction),
+         .en(1'b1),
+         .rs1_val_in(dout_A),
+         .rs2_val_in(dout_B),
+         //outputs
+         .rs1(rs1),
+         .rs2(rs2),
+         .rs1_val(rs1_val),
+         .rs2_val(rs2_val_dec),
+         .rd(rd_dec),
+         .imm(imm),
+         .alu_ctrl(alu_ctrl),
+         .alu_sel_A(alu_sel_A),
+         .alu_sel_B(alu_sel_B),
+         .reg_write(reg_write_dec),
+         .mem_read(mem_read_dec),
+         .mem_write(mem_write_dec),
+         .mem_size(mem_size_dec),
+         .branch(branch),
+         .jal(jal),
+         .jalr(jalr),
+         .lui(lui),
+         .aupc(aupc),
+         .debug(debug)
+     );
+      exec_top execute (
+          //inputs
+          .clk(clk),
+          .en(1'b1),
+          .rs1_val_in(rs1_val), 
+          .rs2_val_in(rs2_val_dec), 
+          .rd_in(rd_dec),
+          .imm(imm),
+          .alu_ctrl(alu_ctrl),
+          .alu_sel_A(alu_sel_A),
+          .alu_sel_B(alu_sel_B),
+          .reg_write_in(reg_write_dec), 
+          .mem_read_in(mem_read_dec),
+          .mem_write_in(mem_write_dec),
+          .mem_size_in(mem_size_dec),
+          .branch(branch),
+          .jal(jal),
+          .jalr(jalr),
+          .lui(lui),
+          .aupc(aupc),
+          .pc_val(pc_val_fetch),
+          //outputs
+          .mod_pc(mod_pc),
+          .mem_read(mem_read_ex),
+          .mem_write(mem_write_ex),
+          .mem_size(mem_size_ex),
+          .reg_write(reg_write_ex),
+          .rd(rd_ex),
+          .alu_val(alu_val),
+          .rs2_val(rs2_val_ex)
+      );
+      store_load_top storeload(
+          //inputs
+          .clk(clk),
+          .en(~instr_write_en),
+          .mem_read(mem_read_ex),
+          .mem_write(mem_write_ex),
+          .mem_size(mem_size_ex),
+          .rd(rd_ex),
+          .alu_val(alu_val),
+          .rs2_val(rs2_val),
+          .reg_write(reg_write_ex),
+          //outputs
+          .reg_writeA_en(reg_writeA_en),
+          .rdA(rdA),
+          .dinA(dinA),
+          .reg_writeB_en(reg_writeB_en),
+          .size_B(size_B),
+          .rdB(rdB),
+          .dinB(dinB)
+      );
+    
+     always begin
+         #20 clk <= clk + 1;
+     end
 
 
 endmodule
