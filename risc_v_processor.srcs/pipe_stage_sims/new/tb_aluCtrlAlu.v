@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 07/09/2024 07:43:54 PM
+// Create Date: 07/23/2024 04:33:29 PM
 // Design Name: 
-// Module Name: tb_sram
+// Module Name: tb_aluCtrlAlu
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,18 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module tb_sram;
-    wire clk;
-    wire rst;
-    wire [31:0] addr;
-    wire read_write;
-    wire [31:0] data_in;
-    wire [31:0] data_out;
-    
-    reg_sram myRam(clk, rst, addr, read_write, data_in, data_out);
-    
-    initial begin
+module tb_aluCtrlAlu(
 
-    end
-    
+    );
 endmodule
