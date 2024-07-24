@@ -128,6 +128,6 @@ module alu(
             end
         endcase
     end
-    assign out = _out;
+    assign alu_out = _out;
     assign branch = _branch;
 endmodule

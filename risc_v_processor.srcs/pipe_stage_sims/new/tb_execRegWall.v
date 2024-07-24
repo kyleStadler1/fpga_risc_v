@@ -18,6 +18,10 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
+
+
+module tb_execRegWall;
+
  parameter ALU_AND  = 4'b0000;  
  parameter ALU_OR   = 4'b0001;  
  parameter ALU_XOR  = 4'b0010;  
@@ -52,10 +56,8 @@
  parameter AUIPC = 7'b0010111;
  parameter LUI = 7'b0110111;
  parameter ENV = 7'b1110011;
-
-module tb_execRegWall;
     reg clk = 0;
-    reg en = 1'b0;
+    reg en = 1'b1;
     reg [31:0] rs1_val_dec = 32'dx;
     reg [31:0] rs2_val_dec = 32'dx;
     reg [4:0] rd_dec = 5'd3;
@@ -72,7 +74,7 @@ module tb_execRegWall;
     reg jump_reg_dec = 0;
     reg lui_dec = 0;
     reg aupc_dec = 0;
-    reg [31:0] pc_val_in = 32'b0;
+    reg [31:0] pc_val_in = 32'hdeadbeef;
     reg [3:0] alu_ctrl_in_mop;
     reg [1:0] alu_selA_mop;
     reg [1:0] alu_selB_mop;
@@ -80,26 +82,26 @@ module tb_execRegWall;
     reg multiop_mop = 0;
     reg [31:0] alu_out_in;
 
-    wire [31:0] rs1_val,
-    wire [31:0] rs2_val, 
-    wire [4:0] rd, 
-    wire [19:0] imm,
-    wire [3:0] alu_ctrl,
-    wire [1:0] alu_selA,
-    wire [1:0] alu_selB,
-    wire reg_write,
-    wire mem_read,
-    wire mem_write,
-    wire [1:0] mem_size,
-    wire branch_pot,
+    wire [31:0] rs1_val;
+    wire [31:0] rs2_val; 
+    wire [4:0] rd;
+    wire [19:0] imm;
+    wire [3:0] alu_ctrl;
+    wire [1:0] alu_selA;
+    wire [1:0] alu_selB;
+    wire reg_write;
+    wire mem_read;
+    wire mem_write;
+    wire [1:0] mem_size;
+    wire branch_pot;
     //wire mod_pc,
-    wire jump,
-    wire jump_reg,
-    wire lui, 
-    wire aupc,
-    wire [31:0] pc_val,
-    wire multiop,
-    wire [31:0] alu_out
+    wire jump;
+    wire jump_reg;
+    wire lui; 
+    wire aupc;
+    wire [31:0] pc_val;
+    wire multiop;
+    wire [31:0] alu_out;
 
     decode_to_execute_reg_wall uut (
         .clk(clk),

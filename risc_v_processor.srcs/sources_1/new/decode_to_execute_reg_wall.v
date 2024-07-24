@@ -92,7 +92,6 @@ module decode_to_execute_reg_wall(
                 mem_write <= 0;
                 mem_size <= 1'bx;
                 branch_pot <= 0;
-                //mod_pc <= 1'b0;
                 jump <= 0;
                 jump_reg <= 0;
                 lui <= 0;
@@ -114,7 +113,6 @@ module decode_to_execute_reg_wall(
                 mem_write <= mem_write_dec;
                 mem_size <= mem_size_dec;
                 branch_pot <= pot_branch_dec;
-                //mod_pc <= 1'b0;
                 jump <= jump_dec;
                 jump_reg <= jump_reg_dec;
                 lui <= lui_dec;
@@ -126,8 +124,6 @@ module decode_to_execute_reg_wall(
                     alu_ctrl <= alu_ctrl_in_mop;
                     alu_selA <= alu_selA_mop;
                     alu_selB <= alu_selB_mop;
-                    //reg_write <= reg_write_in_mop;
-                    //mod_pc <= mod_pc_mop;
                     multiop <= multiop_mop;
                     alu_out <= alu_out_in;
                 end    
