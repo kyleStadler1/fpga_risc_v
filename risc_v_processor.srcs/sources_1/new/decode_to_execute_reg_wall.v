@@ -23,8 +23,8 @@
 module decode_to_execute_reg_wall(
     input clk,
     input en,
-    input [31:0] rs1_val_dec,
-    input [31:0] rs2_val_dec,
+    input [31:0] rs1_dec,
+    input [31:0] rs2_dec,
     input [4:0] rd_dec,
     input [19:0] imm_dec,
     input [3:0] alu_ctrl_dec,
@@ -50,8 +50,8 @@ module decode_to_execute_reg_wall(
     input [31:0] alu_out_in,
     
 
-    output reg [31:0] rs1_val,
-    output reg [31:0] rs2_val, 
+    output reg [31:0] rs1,
+    output reg [31:0] rs2, 
     output reg [4:0] rd, //
     output reg [19:0] imm, //r
     output reg [3:0] alu_ctrl,
@@ -80,8 +80,8 @@ module decode_to_execute_reg_wall(
             end
             if (ctr > 0) begin //this is to basically wait if a branch occoured to throw away the stuff in the pipe thats worthless
                 ctr = ctr - 1;
-                rs1_val <= 1'bx;
-                rs2_val <= 1'bx;
+//                rs1_val <= 1'bx;
+//                rs2_val <= 1'bx;
                 rd <= 1'bx;
                 imm <= 1'bx;
                 alu_ctrl <= 1'bx;
@@ -101,8 +101,8 @@ module decode_to_execute_reg_wall(
                 alu_out <= 32'bx;
             end else begin
                 if (!multiop_mop) begin
-                rs1_val <= rs1_val_dec;
-                rs2_val <= rs2_val_dec;
+                rs1 <= rs1_dec;
+                rs2 <= rs2_dec;
                 rd <= rd_dec;
                 imm <= imm_dec;
                 alu_ctrl <= alu_ctrl_dec;

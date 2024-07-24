@@ -8,11 +8,11 @@ module store_load_top (
     input [4:0] rd,
     input [31:0] alu_val,
     input [31:0] rs2_val,
-    input reg_write,
+    //input reg_write,
 
-    output reg_writeA_en,
-    output [4:0] rdA,
-    output [31:0] dinA,
+//    output reg_writeA_en,
+//    output [4:0] rdA,
+//    output [31:0] dinA,
 
     output reg_writeB_en,
     output [1:0] size_B,
@@ -51,9 +51,9 @@ module store_load_top (
     end
 
 
-    assign reg_writeA_en = reg_write;
-    assign rdA = rd;
-    assign dinA = alu_val;
+//    assign reg_writeA_en = reg_write;
+//    assign rdA = rd;
+//    assign dinA = alu_val;
 
     assign reg_writeB_en = mem_read_p1;
     assign size_B = mem_size_p1;

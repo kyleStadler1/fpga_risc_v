@@ -6,11 +6,11 @@ module dec_top (
 // reg file querie - fully combinatorial
     output [4:0] rs1,
     output [4:0] rs2,
-    input [31:0] rs1_val_in,
-    input [31:0] rs2_val_in,
+//    input [31:0] rs1_val_in,
+//    input [31:0] rs2_val_in,
 //
-    output [31:0] rs1_val, 
-    output [31:0] rs2_val, 
+//    output [31:0] rs1_val, 
+//    output [31:0] rs2_val, 
     output  [4:0] rd,
     output  [19:0] imm,
     output  [3:0] alu_ctrl,
@@ -49,6 +49,4 @@ module dec_top (
         .aupc(aupc),
         .debug(debug)
     );
-    assign rs1_val = rs1_val_in;
-    assign rs2_val = rs2_val_in;
 endmodule

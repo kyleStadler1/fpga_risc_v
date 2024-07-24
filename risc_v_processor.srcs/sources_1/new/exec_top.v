@@ -2,8 +2,12 @@
 module exec_top (
     input clk,
     input en,
-    input [31:0] rs1_val_in, 
-    input [31:0] rs2_val_in, 
+    input [4:0] rs1_in, 
+    input [4:0] rs2_in, 
+    output [4:0] dra_addrA,
+    output [4:0] dra_addrB,
+    input [31:0] dra_doutA,
+    input [31:0] dra_doutB,
     input [4:0] rd_in,
     input [19:0] imm,
     input [3:0] alu_ctrl,
@@ -24,15 +28,17 @@ module exec_top (
     output reg mem_read,
     output reg mem_write,
     output reg [1:0] mem_size,
-    output reg reg_write,
+    output reg_write_toRF,
+    output [4:0] rd_toRF,
+    output [31:0] alu_val_toRF,
     output reg [4:0] rd,
     output reg [31:0] alu_val,
     output reg [31:0] rs2_val
 );
 
-    wire [31:0] rs2_val_latched;
+    wire [4:0] rs2_latched;
     wire [19:0] imm_latched;
-    wire [31:0] rs1_val_latched;
+    wire [4:0] rs1_latched;
     wire [31:0] pc_val_latched;
     wire [31:0] alu_val_latched;
     wire [1:0] selA_latched;
@@ -61,8 +67,8 @@ module exec_top (
     decode_to_execute_reg_wall dtoex (
         .clk(clk),
         .en(1'b1),
-        .rs1_val_dec(rs1_val_in),
-        .rs2_val_dec(rs2_val_in),
+        .rs1_dec(rs1_in),
+        .rs2_dec(rs2_in),
         .rd_dec(rd_in),
         .imm_dec(imm),
         .alu_ctrl_dec(alu_ctrl),
@@ -88,8 +94,8 @@ module exec_top (
         //alu
         .alu_out_in(alu_out),
         //outputs
-        .rs1_val(rs1_val_latched),
-        .rs2_val(rs2_val_latched), 
+        .rs1(rs1_latched),
+        .rs2(rs2_latched), 
         .rd(rd_latched), 
         .imm(imm_latched), 
         .alu_ctrl(alu_ctrl_latched),
@@ -113,9 +119,13 @@ module exec_top (
     wire [31:0] out_A;
     wire [31:0] out_B;
     alu_control_unit acu(
-        .rs2_val(rs2_val_latched),
+        .rs2(rs2_latched),
         .imm(imm_latched),
-        .rs1_val(rs1_val_latched),
+        .rs1(rs1_latched),
+        .dra_addrA(dra_addrA),
+        .dra_addrB(dra_addrB),
+        .dra_doutA(dra_doutA),
+        .dra_doutB(dra_doutB),
         .pc_val(pc_val_latched),
         .alu_val(alu_val_latched),
         .selA(selA_latched),
@@ -157,10 +167,13 @@ module exec_top (
             mem_read <= mem_read_latched;
             mem_write <= mem_read_latched;
             mem_size <= mem_size_latched;
-            reg_write <= multiop_mop ? reg_write_mop : reg_write_latched;
+//            reg_write <= multiop_mop ? reg_write_mop : reg_write_latched;
             rd <= rd_latched;
             alu_val <= alu_out;
-            rs2_val <= rs2_val_latched;
+            rs2_val <= dra_doutB;
         end
     end
+    assign reg_write_toRF = multiop_mop ? reg_write_mop : reg_write_latched;
+    assign rd_toRF = rd_latched;
+    assign alu_val_toRF = alu_out;
 endmodule

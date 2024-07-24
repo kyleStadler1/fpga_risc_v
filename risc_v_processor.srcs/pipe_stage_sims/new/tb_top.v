@@ -26,11 +26,13 @@ module tb_top;
     wire [31:0] IO_out;
 
 
-
+    wire P0 = 1'dz;
     wire instr_write_en;
     wire [31:0] dma_instr_addr;
     wire [31:0] dma_instr_data;
 
+
+    wire P2 = 1'dz;
     //regfile output wires
     wire [31:0] dout_A; //regfile.dout_A -> exec.rs1_val_in
     wire [31:0] dout_B; //regfile.dout_B -> exec.rs2_val_in
@@ -57,11 +59,21 @@ module tb_top;
     wire jalr;
     wire lui;
     wire aupc;
+    
+    wire P4 = 1'dz;
     //execute output wires
     wire mod_pc;
     wire mem_read_ex;
     wire mem_write_ex;
     wire [1:0] mem_size_ex;
+    
+    wire [4:0] dra_addrA;
+    wire [4:0] dra_addrB;
+    
+    wire reg_write_toRF;
+    wire [4:0] rd_toRF;
+    wire [31:0] alu_val_toRF;
+    
     wire reg_write_ex;
     wire [4:0] rd_ex;
     wire [31:0] alu_val;
@@ -70,25 +82,26 @@ module tb_top;
     wire reg_writeA_en;
     wire [4:0] rdA;
     wire [31:0] dinA;
+    wire P6 = 1'dz;
     wire reg_writeB_en;
     wire [1:0] size_B;
     wire [4:0] rdB;
     wire [31:0] dinB;
     //Control wires - ALL NEED TO BE DRIVEN BY USER
-    wire decode_en = 1;
-    wire execute_en = 1;
-    wire storeload_en = 1;
+//    wire decode_en = 1;
+//    wire execute_en = 1;
+//    wire storeload_en = 1;
     
     wire [6:0] debug;
 
     reg_file regfile (
         //inputs
         .clk(clk),
-        .read_addr_A(rs1),
-        .read_addr_B(rs2),
-        .wen_A(reg_writeA_en),
-        .write_addr_A(rdA),
-        .din_A(dinA),
+        .read_addr_A(dra_addrA),
+        .read_addr_B(dra_addrB),
+        .wen_A(reg_write_toRF),
+        .write_addr_A(rd_toRF),
+        .din_A(alu_val_toRF),
         .wen_B(reg_writeB_en),
         .write_addr_B(rdB),
         .din_B(dinB),
@@ -125,13 +138,13 @@ module tb_top;
          .clk(clk),
          .instruction(instruction),
          .en(1'b1),
-         .rs1_val_in(dout_A),
-         .rs2_val_in(dout_B),
+//         .rs1_val_in(dout_A),
+//         .rs2_val_in(dout_B),
          //outputs
          .rs1(rs1),
          .rs2(rs2),
-         .rs1_val(rs1_val),
-         .rs2_val(rs2_val_dec),
+//         .rs1_val(rs1_val),
+//         .rs2_val(rs2_val_dec),
          .rd(rd_dec),
          .imm(imm),
          .alu_ctrl(alu_ctrl),
@@ -152,8 +165,12 @@ module tb_top;
           //inputs
           .clk(clk),
           .en(1'b1),
-          .rs1_val_in(rs1_val), 
-          .rs2_val_in(rs2_val_dec), 
+          .rs1_in(rs1), 
+          .rs2_in(rs2), 
+          .dra_addrA(dra_addrA), //ouyput
+          .dra_addrB(dra_addrB), //output
+          .dra_doutA(dout_A),
+          .dra_doutB(dout_B),
           .rd_in(rd_dec),
           .imm(imm),
           .alu_ctrl(alu_ctrl),
@@ -174,7 +191,11 @@ module tb_top;
           .mem_read(mem_read_ex),
           .mem_write(mem_write_ex),
           .mem_size(mem_size_ex),
-          .reg_write(reg_write_ex),
+          
+          .reg_write_toRF(reg_write_toRF),
+          .rd_toRF(rd_toRF),
+          .alu_val_toRF(alu_val_toRF),
+          
           .rd(rd_ex),
           .alu_val(alu_val),
           .rs2_val(rs2_val_ex)
@@ -188,12 +209,12 @@ module tb_top;
           .mem_size(mem_size_ex),
           .rd(rd_ex),
           .alu_val(alu_val),
-          .rs2_val(rs2_val),
-          .reg_write(reg_write_ex),
+          .rs2_val(rs2_val_ex),
+          //.reg_write(reg_write_ex),
           //outputs
-          .reg_writeA_en(reg_writeA_en),
-          .rdA(rdA),
-          .dinA(dinA),
+//          .reg_writeA_en(reg_writeA_en),
+//          .rdA(rdA),
+//          .dinA(dinA),
           .reg_writeB_en(reg_writeB_en),
           .size_B(size_B),
           .rdB(rdB),

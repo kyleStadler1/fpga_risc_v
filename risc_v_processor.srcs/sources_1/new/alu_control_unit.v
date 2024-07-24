@@ -24,9 +24,13 @@
     // parameter [1:0] AUIPC = 2'b11;
 
 module alu_control_unit(
-    input [31:0] rs2_val,
+    input [31:0] rs2,
     input [19:0] imm,
-    input [31:0] rs1_val,
+    input [31:0] rs1,
+    output [4:0] dra_addrA,
+    output [4:0] dra_addrB,
+    input [31:0] dra_doutA,
+    input [31:0] dra_doutB,
     input [31:0] pc_val,
     input [31:0] alu_val,
     input [1:0] selA,
@@ -46,18 +50,20 @@ module alu_control_unit(
     reg [31:0] _B;
     always @(*) begin
         case(selA)
-            RS2_to_A : _A = rs2_val;
+            RS2_to_A : _A = dra_doutB;
             IMM_to_A : _A = {12'b0, imm};
             four_to_A : _A = 32'd4;
             ALU_to_A : _A = alu_val;
         endcase
         case(selB)
-            RS1_to_B : _B = rs1_val;
+            RS1_to_B : _B = dra_doutA;
             PC_to_B : _B = pc_val;
             twelve_to_B : _B = 32'd12;
             ALU_to_B : _B = alu_val;
         endcase
         end
+        assign dra_addrA = rs1;
+        assign dra_addrB = rs2;
         assign out_A = _A;
         assign out_B = _B;
 endmodule
