@@ -4,10 +4,10 @@ module exec_top (
     input en,
     input [4:0] rs1_in, 
     input [4:0] rs2_in, 
-    output [4:0] dra_addrA,
-    output [4:0] dra_addrB,
-    input [31:0] dra_doutA,
-    input [31:0] dra_doutB,
+    output [4:0] dra_addrA, //direct regfile read access for alu mux
+    output [4:0] dra_addrB, //direct regfile read access for alu mux
+    input [31:0] dra_doutA, //direct regfile read access for alu mux
+    input [31:0] dra_doutB, //direct regfile read access for alu mux
     input [4:0] rd_in,
     input [19:0] imm,
     input [3:0] alu_ctrl,
@@ -23,7 +23,6 @@ module exec_top (
     input lui,
     input aupc,
     input [31:0] pc_val,
-
     output reg mod_pc,
     output reg mem_read,
     output reg mem_write,
@@ -35,7 +34,6 @@ module exec_top (
     output reg [31:0] alu_val,
     output reg [31:0] rs2_val
 );
-
     wire [4:0] rs2_latched;
     wire [19:0] imm_latched;
     wire [4:0] rs1_latched;
@@ -43,27 +41,22 @@ module exec_top (
     wire [31:0] alu_val_latched;
     wire [1:0] selA_latched;
     wire [1:0] selB_latched;
-    
     wire [3:0] alu_ctrl_latched;
     wire [31:0] alu_out;
-    
     wire jal_mop;
     wire jalr_mop;
     wire auipc_mop;
     wire mop_in;
-    
     wire [3:0] alu_ctrl_mop;
     wire [1:0] selA_mop;
     wire [1:0] selB_mop;
     wire reg_write_mop;
     wire mod_pc_mop;
     wire multiop_mop;
-    
     wire mem_read_latched;
     wire [1:0] mem_size_latched;
     wire reg_write_latched;
     wire [4:0] rd_latched;
-
     decode_to_execute_reg_wall dtoex (
         .clk(clk),
         .en(1'b1),
@@ -114,8 +107,6 @@ module exec_top (
         .multiop(mop_in),
         .alu_out(alu_val_latched)
     );
-
-
     wire [31:0] out_A;
     wire [31:0] out_B;
     alu_control_unit acu(
@@ -133,8 +124,6 @@ module exec_top (
         .out_A(out_A),
         .out_B(out_B)
     );
-
-
     wire branch_conf;
     alu alu(
         .alu_ctrl(alu_ctrl_latched),
@@ -143,10 +132,6 @@ module exec_top (
         .alu_out(alu_out),
         .branch(branch_conf)
     );
-
-
-
-
     multiop_controller mop(
         .alu_branch(branch_conf),
         .jump_in(jal_mop),
@@ -159,15 +144,12 @@ module exec_top (
         .mod_pc(mod_pc_mop),
         .multiop_out(multiop_mop)
     );
-
-
     always @(posedge clk) begin
         if (en) begin
             mod_pc <= mod_pc_mop;
             mem_read <= mem_read_latched;
             mem_write <= mem_read_latched;
             mem_size <= mem_size_latched;
-//            reg_write <= multiop_mop ? reg_write_mop : reg_write_latched;
             rd <= rd_latched;
             alu_val <= alu_out;
             rs2_val <= dra_doutB;

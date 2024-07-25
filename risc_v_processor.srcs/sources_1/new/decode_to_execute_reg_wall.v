@@ -40,16 +40,12 @@ module decode_to_execute_reg_wall(
     input lui_dec,
     input aupc_dec,
     input [31:0] pc_val_in,
-
     input [3:0] alu_ctrl_in_mop,
     input [1:0] alu_selA_mop,
     input [1:0] alu_selB_mop,
-    //input reg_write_in_mop,
     input mod_pc_mop,
     input multiop_mop,
     input [31:0] alu_out_in,
-    
-
     output reg [31:0] rs1,
     output reg [31:0] rs2, 
     output reg [4:0] rd, //
@@ -62,7 +58,6 @@ module decode_to_execute_reg_wall(
     output reg mem_write, //
     output reg [1:0] mem_size, //
     output reg branch_pot,
-    //output reg mod_pc,
     output reg jump,
     output reg jump_reg,
     output reg lui, 
@@ -72,7 +67,6 @@ module decode_to_execute_reg_wall(
     output reg [31:0] alu_out
     ); 
     reg [1:0] ctr;
-
     always @(posedge clk) begin
         if (en) begin
             if (mod_pc_mop) begin
@@ -80,8 +74,8 @@ module decode_to_execute_reg_wall(
             end
             if (ctr > 0) begin //this is to basically wait if a branch occoured to throw away the stuff in the pipe thats worthless
                 ctr = ctr - 1;
-//                rs1_val <= 1'bx;
-//                rs2_val <= 1'bx;
+                rs1 <= 1'bx;
+                rs2 <= 1'bx;
                 rd <= 1'bx;
                 imm <= 1'bx;
                 alu_ctrl <= 1'bx;
@@ -130,6 +124,5 @@ module decode_to_execute_reg_wall(
             end
         end
     end
-
 endmodule
 

@@ -164,34 +164,6 @@ module top_top (
     );
 
     
-//    parameter instruction_count = 20;
-//    reg [31:0] mi [0 : instruction_count-1];
-
-    
-
-//    reg [31:0] ctr = 0;
-//    always @(posedge clk) begin
-//        ctr <= ctr+1;
-//        if (ctr == 0) begin
-//            instr_write_en = 1;
-//            mi[0] <= 32'h00600093;
-//            mi[1] <= 32'h00700113;
-//            mi[2] <= 32'h002081b3;
-//        end
-//        if (ctr > 0 && ctr < 4) begin
-//            instr_write_en = 1;
-//            instr_addr = ctr - 1;
-//            instr_data = mi[ctr - 1];
-//        end
-//        if (ctr >= 4) begin
-//            instr_write_en = 0;
-//        end
-//    end
-
-
-
-
-
 
 
 
