@@ -20,14 +20,12 @@ module store_load_top (
     output [31:0] dinB
 );
     wire read_valid;
-
-
     blk_mem_top data_mem(
         .clk(clk),
         .wen(mem_write),
-        .mem_size(mem_size),
         .addr(alu_val),
         .din(rs2_val),
+        .size(mem_size),
         .dout(dinB),
         .read_valid(read_valid)
     );

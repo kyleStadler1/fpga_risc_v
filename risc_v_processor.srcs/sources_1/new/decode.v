@@ -170,7 +170,7 @@ module decode(
                     _alu_ctrl = ALU_ADD;
                     _alu_sel_A = IMM_to_A;
                     _alu_sel_B = RS1_to_B;
-                    _reg_write = 1;
+                    _reg_write = 0;
                     _mem_read = 1;
                     _mem_write = 0;
                     case(_funct3)
@@ -191,7 +191,7 @@ module decode(
                     _rs1 = instr[19:15];
                     _rs2 = instr[24:20];
                     _rd = 5'bxxxxx;
-                    _imm = {13'b0, _funct7};
+                    _imm = {8'b0, _funct7, instr[11:7]};
                     _alu_ctrl = ALU_ADD;
                     _alu_sel_A = IMM_to_A;
                     _alu_sel_B = RS1_to_B;

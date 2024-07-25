@@ -22,7 +22,7 @@
 
 module tb_top;
     reg clk = 0;
-    reg [4:0] IO_addr = 32'd3;
+    reg [4:0] IO_addr = 32'd4;
     wire [31:0] IO_out;
 
 
@@ -74,14 +74,9 @@ module tb_top;
     wire [4:0] rd_toRF;
     wire [31:0] alu_val_toRF;
     
-    wire reg_write_ex;
     wire [4:0] rd_ex;
     wire [31:0] alu_val;
     wire [31:0] rs2_val_ex;
-    //storeload output wires
-    wire reg_writeA_en;
-    wire [4:0] rdA;
-    wire [31:0] dinA;
     wire P6 = 1'dz;
     wire reg_writeB_en;
     wire [1:0] size_B;
@@ -203,7 +198,7 @@ module tb_top;
       store_load_top storeload(
           //inputs
           .clk(clk),
-          .en(~instr_write_en),
+          .en(1'b1),
           .mem_read(mem_read_ex),
           .mem_write(mem_write_ex),
           .mem_size(mem_size_ex),

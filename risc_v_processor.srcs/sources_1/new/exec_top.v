@@ -148,7 +148,7 @@ module exec_top (
         if (en) begin
             mod_pc <= mod_pc_mop;
             mem_read <= mem_read_latched;
-            mem_write <= mem_read_latched;
+            mem_write <= mem_write_latched;
             mem_size <= mem_size_latched;
             rd <= rd_latched;
             alu_val <= alu_out;
