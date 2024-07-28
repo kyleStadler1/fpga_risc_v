@@ -34,7 +34,26 @@ module blk_mem_top(
     output [31:0] dout,
     output read_valid
     );
-    blk_mem_gen M(clk, {wen,wen,wen,wen}, addr[14:0], din, dout);
+    parameter byte = 2'b01;
+    parameter half_word = 2'b10;
+    parameter word = 2'b11;
+    wire [14:0] word_addr;
+    wire [2:0] byte_addr;
+    reg [3:0] _mask;
+    reg [31:0] _dout;
+    blk_mem_gen M(clk, wen ? _wm : 4'b0000, word_addr, din, _dout);
+    
+    //masking for both read and write logic
+    always @(*) begin
+            case (size)
+                byte : _mask = 4'b0001 << byte_addr;
+                half_word : _mask = 4'b0011 << byte_addr;
+                word : _mask = 4'b1111;
+            endcase
+    end
+    assign dout = _dout & _mask;
+   
+   //read valid logic
     reg prev_op;
     reg prev_prev_op;
     always @(posedge clk) begin
@@ -42,46 +61,12 @@ module blk_mem_top(
         prev_prev_op <= prev_op;
    end 
    assign read_valid = ~prev_prev_op;
+   
+   
+   assign word_addr = addr[16:2];
+   assign byte_addr = addr[1:0];
 endmodule
 
 
 
-//module blk_mem_top(
-//    input clk,
-//    //input [3:0] wen,
-//    input wen,
-//    input [1:0] mem_size,
-//    input [31:0] addr, //word addressed
-//    input [31:0] din,
-//    output [31:0] dout,
-//    output read_valid
-//    );
-//    reg prev_op;
-//    reg prev_prev_op;
-//    reg [3:0] write_mask;
-//    wire [31:0] raw_dout;
-//    reg [31:0] _dout;
-//    blk_mem_gen M_d(clk, {wen, wen, wen, wen}, addr[14:0], din, dout);
-
-//    always @(posedge clk) begin
-//        prev_op <= wen;
-//        prev_prev_op <= prev_op;
-        
-////        if (wen) begin
-////            case(mem_size)
-////                2'b01 : write_mask = 4'b0001;
-////                2'b10 : write_mask = 4'b0011;
-////                2'b11 : write_mask = 4'b1111;
-////            endcase
-////        end else begin
-////            case(mem_size)
-////                2'b01 : _dout = raw_dout & 32'h000000ff;
-////                2'b10 : _dout = raw_dout & 32'h0000ffff;
-////                2'b11 : _dout = raw_dout;
-////            endcase 
-////        end
-//    end
-//    assign dout = _dout;
-//    assign read_valid = ~prev_prev_op;
-//endmodule
 
