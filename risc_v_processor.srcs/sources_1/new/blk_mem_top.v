@@ -40,8 +40,8 @@ module blk_mem_top(
     wire [14:0] word_addr;
     wire [2:0] byte_addr;
     reg [3:0] _mask;
-    reg [31:0] _dout;
-    blk_mem_gen M(clk, wen ? _wm : 4'b0000, word_addr, din, _dout);
+    wire [31:0] _dout;
+    blk_mem_gen M(clk, wen ? _mask : 4'b0000, word_addr, din, _dout);
     
     //masking for both read and write logic
     always @(*) begin
@@ -51,7 +51,7 @@ module blk_mem_top(
                 word : _mask = 4'b1111;
             endcase
     end
-    assign dout = _dout & _mask;
+    assign dout = _dout & _mask;//fan it out
    
    //read valid logic
     reg prev_op;
