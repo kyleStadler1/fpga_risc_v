@@ -22,54 +22,136 @@
 
 module tb_dmem;
     reg clk = 0;
-    reg mem_read_ex;
-    reg mem_write_ex;
-    reg [4:0] rd_ex;
-    reg [31:0] alu_val;
-    reg [31:0] rs2_val_ex;
+    reg mem_read;
+    reg mem_write;
+    reg [1:0] mem_size;
+    reg [4:0] rd;
+    reg [31:0] addr;
+    reg [31:0] din;
     wire [31:0] dout;
     wire read_valid;
     
     blk_mem_top data_mem(
         .clk(clk),
-        .wen(mem_write_ex),
-       // .mem_size(mem_size_ex),
-        .addr(alu_val),
-        .din(rs2_val_ex),
+        .wen(mem_write),
+        .addr(addr),
+        .din(din),
+        .size(mem_size),
         .dout(dout),
         .read_valid(read_valid)
     );
     
-    initial begin
-        clk = 0;
-        mem_read_ex = 0;
-        mem_write_ex = 1;
+//    initial begin
+//        clk = 0;
+//        mem_read_ex = 0;
+//        mem_write_ex = 1;
 //        mem_size_ex = 2'b11;
-        alu_val = 32'd4;
-        rs2_val_ex = 32'hd;
-        #10;
-        clk = 1;
-        #10;
-        clk = 0;
-        mem_read_ex = 1;
-        mem_write_ex = 0;
+//        alu_val = 32'd0;
+//        rs2_val_ex = 32'hd;
+//        #10;
+//        clk = 1;
+//        #10;
+//        clk = 0;
+//        mem_read_ex = 1;
+//        mem_write_ex = 0;
 //        mem_size_ex = 2'b11;
-        alu_val = 32'd4;
-        rs2_val_ex = 32'hx;
-        #10;
-        clk = 1;
-        #10;
-        clk = 0;
-        #10;
-        clk = 1;
-        #10;
-        clk = 0;
-        #10;
-        clk = 1;
-        #10;
-        clk = 0;
-        #10;
-        clk = 1;
-        $finish;
-        end
+//        rs2_val_ex = 32'hx;
+//        #10;
+//        clk = 1;
+//        #10;
+//        clk = 0;
+//        #10;
+//        clk = 1;
+//        #10;
+//        clk = 0;
+//        #10;
+//        clk = 1;
+//        #10;
+//        clk = 0;
+//        #10;
+//        clk = 1;
+//        $finish;
+//        end
+        
+    reg [31:0] ctr = 0;
+    always @(posedge clk) begin
+        ctr <= ctr + 1;
+        case(ctr)
+        1 : begin
+            mem_read = 0;
+            mem_write = 1;
+            mem_size = 2'b01;
+            addr = 0;
+            din = 32'ha;
+            end
+        2 : begin
+            mem_read = 0;
+            mem_write = 1;
+            mem_size = 2'b01;
+            addr = 1;
+            din = 32'hb;
+            end
+        3 : begin
+            mem_read = 0;
+            mem_write = 1;
+            mem_size = 2'b01;
+            addr = 2;
+            din = 32'hc;
+            end
+        4 : begin
+            mem_read = 0;
+            mem_write = 1;
+            mem_size = 2'b01;
+            addr = 3;
+            din = 32'hd;
+            end
+        5 : begin
+            mem_read = 1;
+            mem_write = 0;
+            mem_size = 2'b11;
+            addr = 0;
+            end
+        6 : begin
+            mem_read = 1;
+            mem_write = 0;
+            mem_size = 2'b10;
+            addr = 0;
+            end
+        7 : begin
+            mem_read = 1;
+            mem_write = 0;
+            mem_size = 2'b10;
+            addr = 2;
+            end
+        8 : begin
+            mem_read = 1;
+            mem_write = 0;
+            mem_size = 2'b01;
+            addr = 0;
+            end
+        9 : begin
+            mem_read = 1;
+            mem_write = 0;
+            mem_size = 2'b01;
+            addr = 1;
+            end
+        10 : begin
+            mem_read = 1;
+            mem_write = 0;
+            mem_size = 2'b01;
+            addr = 2;
+            end
+        11 : begin
+            mem_read = 1;
+            mem_write = 0;
+            mem_size = 2'b01;
+            addr = 3;
+            end
+        endcase
+    end  
+
+    
+     always begin
+         #20 clk <= clk + 1;
+     end
 endmodule

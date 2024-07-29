@@ -39,11 +39,4 @@ module fetch_top(
         .pc_val_in(_pc_val),
         .pc_val(pc_val)
     );
-
-    
-    // always @(posedge clk) begin
-    //     pc_val_p0 <= _pc_val;
-    //     pc_val_p1 <= pc_val_p0;
-    // end
-    // assign pc_val = pc_val_p1;
 endmodule
