@@ -22,7 +22,7 @@
 
 module tb_top;
     reg clk = 0;
-    reg [4:0] IO_addr = 32'd5;
+    reg [4:0] IO_addr = 32'd3;
     wire [31:0] IO_out;
 
 
