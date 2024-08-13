@@ -23,7 +23,7 @@
 module tb_top;
     //tb wires
     reg clk = 0;
-    reg [4:0] IO_addr = 5'd5;
+    reg [4:0] IO_addr = 5'd4;
     wire [31:0] IO_out;
 //////////////////////////////////////////////////////////////////////////////////
     wire P0 = 1'dz; 
@@ -86,18 +86,19 @@ module tb_top;
    parameter decPipe = 2'd1;
    parameter execPipe = 2'd0;
    reg [2:0] ctr = 0;
-   wire decEn = 1;
-   wire execEn = 1;
-//   always @(posedge clk) begin
-//        if (modPc) begin
-//            ctr <= 2'd3;
-//        end
-//        if (ctr > 0) begin
-//            ctr <= ctr - 1;
-//        end
-//   end
-//   assign decEn = ctr <= decPipe;
-//   assign execEn = ctr <= execPipe;
+   wire decEn;
+   wire execEn;
+   
+   always @(posedge clk) begin
+        if (modPc) begin
+            ctr <= 2'd3;
+        end
+        if (ctr > 0) begin
+            ctr <= ctr - 1;
+        end
+   end
+   assign decEn = ctr <= decPipe;
+   assign execEn = ctr <= execPipe;
    
 
 
@@ -129,8 +130,8 @@ module tb_top;
      fetch_top fetch(
         //inputs
         .clk(clk),
-        .branch_vect(32'hffffffff),
-        .branch_en(1'b0),
+        .branch_vect(pcVect),
+        .branch_en(modPc),
         .dma_instr_write_en(instr_write_en),
         .dma_instr_addr(dma_instr_addr),
         .dma_instr_write_data(dma_instr_data),
@@ -143,7 +144,7 @@ module tb_top;
          //inputs
          .clk(clk),
          .instruction(instruction),
-         .en(1'b1),
+         .en(decEn),
          //outputs
          .rs1(rs1),
          .rs2(rs2),
@@ -168,7 +169,7 @@ module tb_top;
     end
     exec_top execute(
         .clk(clk),
-        .en(1'b1),
+        .en(execEn),
         .readAddrA(readAddrA),
         .readAddrB(readAddrB),
         .doutA(doutA),

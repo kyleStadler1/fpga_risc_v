@@ -216,7 +216,7 @@ module decode(
                     _rs1 = instr[19:15];
                     _rs2 = instr[24:20];
                     _rd = 5'bxxxxx;
-                    _imm = {25'b0, _funct7};
+                    _imm = {20'b0, instr[31:25], instr[11:7]};
                     case(_funct3)
                         3'h0 : _alu_ctrl = ALU_BEQ;
                         3'h1 : _alu_ctrl = ALU_BNE;

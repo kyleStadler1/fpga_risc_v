@@ -34,7 +34,7 @@ module exec_top(
     assign readAddrB = rs2;
     assign rs1Val = doutA;
     assign rs2Val = doutB;
-    assign wenA = regWrite;
+    assign wenA = regWrite & en;
     assign writeAddrA = rd;
     assign dinA = aluVal;
     
