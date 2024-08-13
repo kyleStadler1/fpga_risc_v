@@ -41,7 +41,7 @@ module prog_ctr(
             case(sel)
                 1'b1 : next_instr = branch_vect;
                 1'b0 : next_instr = curr_instr + 3'b100; //next 
-                default : next_instr = 32'd999;
+                default : next_instr = curr_instr + 3'b100;
             endcase
             curr_instr <= next_instr;
         end

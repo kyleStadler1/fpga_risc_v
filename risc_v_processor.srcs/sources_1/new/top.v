@@ -2,142 +2,199 @@
 
 module top(
     input clk, 
-    input en,
-    output [31:0] rs1_val,
-    output [31:0] rs2_val,
-    output [4:0] rd,
-    output [19:0] imm,
-    output [3:0] alu_ctrl,
-    output alu_src,
-    output reg_write,
-    output mem_read,
-    output mem_write,
-    output [1:0] mem_size,
-    output branch,
-    output jump,
-    output jump_reg,
-    output lui,
-    output aupc,
-    output [31:0] pc_decode_to_exec_piped
+    output [31:0] IO
+);
+
+    reg [4:0] IO_addr = 5'd5;
+    wire [31:0] IO_out;
+    assign IO = IO_out;
+  //////////////////////////////////////////////////////////////////////////////////
+    wire P0 = 1'dz; 
+    wire instr_write_en;
+    wire [31:0] dma_instr_addr;
+    wire [31:0] dma_instr_data;
+//////////////////////////////////////////////////////////////////////////////////
+    wire P2 = 1'dz;
+    //fetch output wires
+    wire [31:0] instruction; 
+    wire [31:0] pc_val_fetch; 
+    wire instr_valid;
+//////////////////////////////////////////////////////////////////////////////////
+    wire P3 = 1'dz;
+    //decode output
+    wire [4:0] rs1;
+    wire [4:0] rs2;
+    wire [4:0] rd;
+    wire [31:0] imm;
+    wire [3:0] aluCtrl;
+    wire [1:0] selA;
+    wire [1:0] selB;
+    wire regWriteDec; 
+    wire memReadDec;
+    wire memWriteDec;
+    wire [1:0] memSizeDec;
+    wire branch;
+    wire jal;
+    wire jalr;
+    wire lui;
+    wire aupc;
+    reg [31:0] pc_val_dec;
+    //regfile AB read, A write wires
+    wire [4:0] readAddrA;
+    wire [4:0] readAddrB;
+    wire [31:0] doutA; 
+    wire [31:0] doutB; 
+    wire wenA;
+    wire [4:0] writeAddrA;
+    wire [31:0] dinA;
+//////////////////////////////////////////////////////////////////////////////////
+    wire P4 = 1'dz;
+    //execute output wires
+    wire [4:0] rdOut;
+    wire [31:0] aluVal;
+    wire [31:0] rs2Val;
+    wire modPc;
+    wire [31:0] pcVect;
+    reg memReadExec, memWriteExec;
+    reg [1:0] memSizeExec;
+//////////////////////////////////////////////////////////////////////////////////    
+    wire P5 = 1'dz;
+    //stoeLoad outoputs
+    wire memReadValid;
+    //regfile B write wires
+    wire wenB;
+    wire [4:0] writeAddrB;
+    wire [31:0] dinB;
+//////////////////////////////////////////////////////////////////////////////////   
+   parameter decPipe = 2'd1;
+   parameter execPipe = 2'd0;
+   reg [2:0] ctr = 0;
+   wire decEn = 1;
+   wire execEn = 1;
+//   always @(posedge clk) begin
+//        if (modPc) begin
+//            ctr <= 2'd3;
+//        end
+//        if (ctr > 0) begin
+//            ctr <= ctr - 1;
+//        end
+//   end
+//   assign decEn = ctr <= decPipe;
+//   assign execEn = ctr <= execPipe;
+   
 
 
-    );
 
-    //PC inputs
-    //clk
-    wire en;
-    wire pc_rst;
-    wire [31:0] alu_out_to_pc;
-    wire pc_sel;
-    //PC outputs
-    wire [31:0] pc_instr_addr;
-    //PC Instantiation
-    prog_ctr pc(clk, en, pc_rst, alu_out_to_pc, pc_sel, pc_instr_addr);
 
-    //IMEM inputs
-    //clk
-    wire [3:0] imem_wen = 4'b0000;
-    //wire [13:0] imem_addr;
-    wire [31:0] imem_din = 32'b0;
-    //IMEM outputs
-    wire [31:0] imem_dout;
-    wire imem_read_valid;
-    //IMEM Instantiation
-    instr_blk_mem_top imem(clk, imem_wen, pc_instr_addr, imem_din, imem_dout, imem_read_valid);
-    
-    wire [31:0] pc_instr_addr_decodePipe;
-    fetch_to_decode_reg_wall f_to_dec (clk, en, pc_instr_addr, pc_instr_addr_decodePipe);
-
-    //DECODE inputs
-    //clk
-    //wire [31:0] decode_instr;
-
-    //DECODE outputs
-    // wire [4:0] decode_rs1;
-    // wire [4:0] decode_rs2; 
-    // wire [4:0] decode_rd;
-    // wire [19:0] decode_imm;
-    // wire [3:0] decode_alu_ctrl;
-    // wire decode_alu_src;
-    // wire decode_reg_write;
-    // wire decode_mem_read;
-    // wire decode_mem_write;
-    // wire [3:0] decode_mem_size;
-    // wire decode_branch;
-    // wire decode_jump;
-    // wire decode_jump_reg;
-    // wire decode_lui;
-    // wire decode_aupc;
-    //DECODE Instantiation
-    decode decode(
-        clk, 
-        imem_dout, 
-        decode_rs1, 
-        decode_rs2, 
-        decode_rd, 
-        decode_imm, 
-        decode_alu_ctrl, 
-        decode_alu_src,
-        decode_reg_write,
-        decode_mem_read,
-        decode_mem_write,
-        decode_mem_size,
-        decode_branch,
-        decode_jump,
-        decode_jump_reg,
-        decode_lui,
-        decode_aupc
-    );
-    wire [31:0] rs1_val;
-    wire [31:0] rs2_val;
-    reg_file reg_file_inst (
+    reg_file regfile (
+        //inputs
         .clk(clk),
-        .read_addr_A(decode_rs1),
-        .read_addr_B(decode_rs2),
-        .wen_A(decode_reg_write),
-        .write_addr_A(decode_rd),
-        .din_A(imem_dout),
-        .wen_B(1'b0),            // Assuming write enable B is not used
-        .write_addr_B(5'b0),     // Assuming write address B is not used
-        .din_B(32'b0),           // Assuming data input B is not used
-        .dout_A(rs1_val),        // Connecting to the output signal
-        .dout_B(rs2_val)         // Connecting to the output signal
+        .read_addr_A(readAddrA),
+        .read_addr_B(readAddrB),
+        .wen_A(wenA),
+        .write_addr_A(writeAddrA),
+        .din_A(dinA),
+        .wen_B(wenB),
+        .write_addr_B(writeAddrB),
+        .din_B(dinB),
+        .read_addr_C(IO_addr),
+        //outputs
+        .dout_A(doutA),
+        .dout_B(doutB),
+        .dout_C(IO_out)
     );
-    decode_to_execute_reg_wall decode_to_execute_inst (
+    instr_writer writer(
         .clk(clk),
-        .en(en),
-        .rs1_val_in(rs1_val),
-        .rs2_val_in(rs2_val),
-        .rd_in(decode_rd),
-        .imm_in(decode_imm),
-        .alu_ctrl_in(decode_alu_ctrl),
-        .alu_src_in(decode_alu_src),
-        .reg_write_in(decode_reg_write),
-        .mem_read_in(decode_mem_read),
-        .mem_write_in(decode_mem_write),
-        .mem_size_in(decode_mem_size),
-        .branch_in(decode_branch),
-        .jump_in(decode_jump),
-        .jump_reg_in(decode_jump_reg),
-        .lui_in(decode_lui),
-        .aupc_in(decode_aupc),
-        .pc_val_in(pc_instr_addr_decodePipe),
-        .rs1_val(rs1_val),
-        .rs2_val(rs2_val),
+        .instr_write_en(instr_write_en),
+        .addr(dma_instr_addr),
+        .data(dma_instr_data)
+    );
+     fetch_top fetch(
+        //inputs
+        .clk(clk),
+        .branch_vect(32'hffffffff),
+        .branch_en(1'b0),
+        .dma_instr_write_en(instr_write_en),
+        .dma_instr_addr(dma_instr_addr),
+        .dma_instr_write_data(dma_instr_data),
+        //outputs
+        .instruction(instruction),
+        .instr_valid(instr_valid),
+        .pc_val(pc_val_fetch)
+    );
+    dec_top decode(
+         //inputs
+         .clk(clk),
+         .instruction(instruction),
+         .en(1'b1),
+         //outputs
+         .rs1(rs1),
+         .rs2(rs2),
+         .rd(rd),
+         .imm(imm),
+         .alu_ctrl(aluCtrl),
+         .alu_sel_A(selA),
+         .alu_sel_B(selB),
+         .reg_write(regWriteDec),
+         .mem_read(memReadDec),
+         .mem_write(memWriteDec),
+         .mem_size(memSizeDec),
+         .branch(branch),
+         .jal(jal),
+         .jalr(jalr),
+         .lui(lui),
+         .aupc(aupc),
+         .debug()
+    );
+    always @(posedge clk) begin
+        pc_val_dec <= pc_val_fetch;
+    end
+    exec_top execute(
+        .clk(clk),
+        .en(1'b1),
+        .readAddrA(readAddrA),
+        .readAddrB(readAddrB),
+        .doutA(doutA),
+        .doutB(doutB),
+        .wenA(wenA),
+        .writeAddrA(writeAddrA),
+        .dinA(dinA),
+        .rs1(rs1),
+        .rs2(rs2),
         .rd(rd),
         .imm(imm),
-        .alu_ctrl(alu_ctrl),
-        .alu_src(alu_src),
-        .reg_write(reg_write),
-        .mem_read(mem_read),
-        .mem_write(mem_write),
-        .mem_size(mem_size),
-        .branch(branch),
-        .jump(jump),
-        .jump_reg(jump_reg),
-        .lui(lui),
-        .aupc(aupc),
-        .pc_val(pc_decode_to_exec_piped)
+        .aluCtrl(aluCtrl),
+        .selA(selA),
+        .selB(selB),
+        .regWrite(regWriteDec),
+        .jal(jal),
+        .jalr(jalr),
+        .pc(pc_val_dec),
+        .rdOut(rdOut),
+        .aluVal(aluVal),
+        .rs2ValOut(rs2Val),
+        .modPc(modPc),
+        .pcVect(pcVect)
+    );
+    always @(posedge clk) begin
+        memReadExec <= memReadDec;
+        memWriteExec <= memWriteDec;
+        memSizeExec <= memSizeDec;
+    end
+    store_load_top storeload(
+        //inputs
+        .clk(clk),
+        .en(1'b1),
+        .mem_read(memReadExec),
+        .mem_write(memWriteExec),
+        .mem_size(memSizeExec),
+        .rd(rdOut),
+        .alu_val(aluVal),
+        .rs2_val(rs2Val),
+        .reg_writeB_en(wenB),
+        .rdB(writeAddrB),
+        .dinB(dinB),
+        .mem_read_valid(memReadValid)
     );
         
 endmodule

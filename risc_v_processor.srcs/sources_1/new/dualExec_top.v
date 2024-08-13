@@ -1,7 +1,27 @@
 `timescale 1ns / 1ps
-module exec_top(
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 08/01/2024 11:26:51 PM
+// Design Name: 
+// Module Name: dualExec_top
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module dualExec_top(
     input clk,
-    input en,
     //direct reg read access
     output [4:0] readAddrA,
     output [4:0] readAddrB,
@@ -25,7 +45,7 @@ module exec_top(
     input [31:0] pc,
     output reg [4:0] rdOut,
     output reg [31:0] aluVal,
-    output reg [31:0] rs2ValOut,
+    output reg rs2ValOut,
     output reg modPc,
     output reg [31:0] pcVect
     );
@@ -40,9 +60,9 @@ module exec_top(
     
     wire [31:0] A, B;
      alu_control_unit acu(
-        .rs2Val(rs2Val),
+        .rs2Val(rs2),
         .imm(imm),
-        .rs1Val(rs1Val),
+        .rs1Val(rs1),
         .pcVal(pc),
         .selA(selA),
         .selB(selB),
@@ -52,10 +72,10 @@ module exec_top(
     wire branchValid;
     wire [31:0] _aluVal;
     alu alu(
-        .aluCtrl(aluCtrl),
+        .alu_ctrl(aluCtrl),
         .A(A),
         .B(B),
-        .aluOut(_aluVal),
+        .alu_out(_aluVal),
         .branchValid(branchValid)
     );
     wire [31:0] pc_imm, rs1_imm, _pcVect; //mini alu for just these 2 ops
@@ -64,12 +84,10 @@ module exec_top(
     assign _pcVect = (branchValid | jal) ? pc_imm : rs1_imm;
     
     always @(posedge clk) begin
-        if (en) begin
-            rdOut <= rd;
-            aluVal <= _aluVal;
-            rs2ValOut <= rs2Val;
-            modPc <= branchValid | jal | jalr;
-            pcVect <= _pcVect;
-        end
+        rdOut <= rd;
+        aluVal <= _aluVal;
+        rs2ValOut <= rs2Val;
+        modPc <= branchValid | jal | jalr;
+        pcVect <= _pcVect;
     end
 endmodule

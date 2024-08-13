@@ -21,11 +21,11 @@
 
 
 module alu(
-    input [3:0] alu_ctrl,
+    input [3:0] aluCtrl,
     input [31:0] A,
     input [31:0] B,
-    output [31:0] alu_out,
-    output branch
+    output [31:0] aluOut,
+    output branchValid
     );
     parameter ALU_AND  = 4'b0000;  
     parameter ALU_OR   = 4'b0001;  
@@ -46,7 +46,7 @@ module alu(
     reg [31:0] _out;
     reg _branch;
     always @(*) begin
-         case(alu_ctrl)
+         case(aluCtrl)
             ALU_AND: begin
                 _out = A&B;
                 _branch = 0;
@@ -128,6 +128,6 @@ module alu(
             end
         endcase
     end
-    assign alu_out = _out;
-    assign branch = _branch;
+    assign aluOut = _out;
+    assign branchValid = _branch;
 endmodule

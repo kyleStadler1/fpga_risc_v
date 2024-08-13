@@ -26,7 +26,7 @@ module decode(
     output [4:0] rs1, 
     output [4:0] rs2, 
     output  [4:0] rd,
-    output  [19:0] imm,
+    output  [31:0] imm,
     output  [3:0] alu_ctrl,
     output  [1:0] alu_sel_A,
     output  [1:0] alu_sel_B,
@@ -86,7 +86,7 @@ module decode(
     reg [4:0] _rs1;
     reg [4:0] _rs2;
     reg [4:0] _rd;
-    reg [19:0] _imm;
+    reg [31:0] _imm;
     reg [3:0] _alu_ctrl;
     reg [1:0] _alu_sel_A;
     reg [1:0] _alu_sel_B;
@@ -110,7 +110,7 @@ module decode(
                     _rs1 = instr[19:15];
                     _rs2 = instr[24:20];
                     _rd = instr[11:7];
-                    _imm = 20'bx;
+                    _imm = 32'bx;
                     case(_funct3)
                         3'h0 : _alu_ctrl = (_funct7 == 0) ? ALU_ADD : ALU_SUB;
                         3'h4 : _alu_ctrl = ALU_XOR;
@@ -138,7 +138,7 @@ module decode(
                     _rs1 = instr[19:15];
                     _rs2 = 5'bxxxxx;
                     _rd = instr[11:7];
-                    _imm = {8'b0, _funct7, instr[24:20]};
+                    _imm = {20'b0, _funct7, instr[24:20]};
                     case(_funct3)
                         3'h0 : _alu_ctrl = ALU_ADD;
                         3'h4 : _alu_ctrl = ALU_XOR;
@@ -166,7 +166,7 @@ module decode(
                     _rs1 = instr[19:15];
                     _rs2 = 5'bxxxxx;
                     _rd = instr[11:7];
-                    _imm = {8'b0, _funct7, instr[24:20]};
+                    _imm = {20'b0, _funct7, instr[24:20]};
                     _alu_ctrl = ALU_ADD;
                     _alu_sel_A = IMM_to_A;
                     _alu_sel_B = RS1_to_B;
@@ -191,7 +191,8 @@ module decode(
                     _rs1 = instr[19:15];
                     _rs2 = instr[24:20];
                     _rd = 5'bxxxxx;
-                    _imm = {8'b0, _funct7, instr[11:7]};
+                    _imm = {20'b0, instr[31:25], instr[11:7]};
+                    
                     _alu_ctrl = ALU_ADD;
                     _alu_sel_A = IMM_to_A;
                     _alu_sel_B = RS1_to_B;
@@ -215,7 +216,7 @@ module decode(
                     _rs1 = instr[19:15];
                     _rs2 = instr[24:20];
                     _rd = 5'bxxxxx;
-                    _imm = {13'b0, _funct7};
+                    _imm = {25'b0, _funct7};
                     case(_funct3)
                         3'h0 : _alu_ctrl = ALU_BEQ;
                         3'h1 : _alu_ctrl = ALU_BNE;
@@ -242,7 +243,7 @@ module decode(
                     _rs1 = PC_ADDR;
                     _rs2 = 5'bxxxxx;
                     _rd = instr[11:7];
-                    _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
+                    _imm = {12'b0, _funct7, instr[24:20], instr[19:15], _funct3};
                     _alu_ctrl = ALU_ADD;
                     _alu_sel_A = four_to_A;
                     _alu_sel_B = PC_to_B;
@@ -251,7 +252,7 @@ module decode(
                     _mem_write = 0;
                     _mem_size = 2'bxx;
                     _branch = 0;
-                    _jal = 1;
+                    _jal = 1; //TEMP
                     _jalr = 0;
                     _lui = 0;
                     _aupc = 0;
@@ -262,7 +263,7 @@ module decode(
                     _rs1 = PC_ADDR;
                     _rs2 = 5'bxxxxx;
                     _rd = instr[11:7];
-                    _imm = {8'b0, _funct7, instr[24:20]};
+                    _imm = {20'b0, _funct7, instr[24:20]};
                     _alu_sel_A = four_to_A;
                     _alu_sel_B = PC_to_B;
                     _reg_write = 1;
@@ -281,7 +282,7 @@ module decode(
                     _rs1 = 5'bxxxxx;
                     _rs2 = 5'bxxxxx;
                     _rd = instr[11:7];
-                    _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
+                    _imm = {12'b0, _funct7, instr[24:20], instr[19:15], _funct3};
                     _alu_ctrl = ALU_SLL;
                     _alu_sel_A = IMM_to_A;
                     _alu_sel_B = twelve_to_B;
@@ -301,7 +302,7 @@ module decode(
                     _rs1 = 5'bxxxxx;
                     _rs2 = 5'bxxxxx;
                     _rd = instr[11:7];
-                    _imm = {_funct7, instr[24:20], instr[19:15], _funct3};
+                    _imm = {_funct7, instr[24:20], instr[19:15], _funct3, 12'b0};
                     _alu_ctrl = ALU_SLL;
                     _alu_sel_A = IMM_to_A;
                     _alu_sel_B = twelve_to_B;
