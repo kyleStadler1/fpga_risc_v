@@ -23,7 +23,7 @@
 module tb_top;
     //tb wires
     reg clk = 0;
-    reg [4:0] IO_addr = 5'd4;
+    reg [4:0] IO_addr = 5'd2;
     wire [31:0] IO_out;
 //////////////////////////////////////////////////////////////////////////////////
     wire P0 = 1'dz; 
@@ -35,6 +35,7 @@ module tb_top;
     //fetch output wires
     wire [31:0] instruction; 
     wire [31:0] pc_val_fetch; 
+    wire newVect_fetch;
     wire instr_valid;
 //////////////////////////////////////////////////////////////////////////////////
     wire P3 = 1'dz;
@@ -56,17 +57,20 @@ module tb_top;
     wire lui;
     wire aupc;
     reg [31:0] pc_val_dec;
+    reg newVect_dec;
     //regfile AB read, A write wires
     wire [4:0] readAddrA;
     wire [4:0] readAddrB;
     wire [31:0] doutA; 
     wire [31:0] doutB; 
-    wire wenA;
-    wire [4:0] writeAddrA;
-    wire [31:0] dinA;
+  
+    //wire [4:0] writeAddrA;
+    //wire [31:0] dinA;
+    wire [31:0] _a, _b;
 //////////////////////////////////////////////////////////////////////////////////
     wire P4 = 1'dz;
     //execute output wires
+    wire wenA;
     wire [4:0] rdOut;
     wire [31:0] aluVal;
     wire [31:0] rs2Val;
@@ -83,26 +87,7 @@ module tb_top;
     wire [4:0] writeAddrB;
     wire [31:0] dinB;
 //////////////////////////////////////////////////////////////////////////////////   
-   parameter decPipe = 2'd1;
-   parameter execPipe = 2'd0;
-   reg [2:0] ctr = 0;
-   wire decEn;
-   wire execEn;
-   
-   always @(posedge clk) begin
-        if (modPc) begin
-            ctr <= 2'd3;
-        end
-        if (ctr > 0) begin
-            ctr <= ctr - 1;
-        end
-   end
-   assign decEn = ctr <= decPipe;
-   assign execEn = ctr <= execPipe;
-   
-
-
-
+    
 
     reg_file regfile (
         //inputs
@@ -110,8 +95,8 @@ module tb_top;
         .read_addr_A(readAddrA),
         .read_addr_B(readAddrB),
         .wen_A(wenA),
-        .write_addr_A(writeAddrA),
-        .din_A(dinA),
+        .write_addr_A(rdOut),
+        .din_A(aluVal),
         .wen_B(wenB),
         .write_addr_B(writeAddrB),
         .din_B(dinB),
@@ -138,13 +123,14 @@ module tb_top;
         //outputs
         .instruction(instruction),
         .instr_valid(instr_valid),
-        .pc_val(pc_val_fetch)
+        .pc_val(pc_val_fetch),
+        .newVect(newVect_fetch)
     );
     dec_top decode(
          //inputs
          .clk(clk),
          .instruction(instruction),
-         .en(decEn),
+         .en(1'b1),
          //outputs
          .rs1(rs1),
          .rs2(rs2),
@@ -166,17 +152,19 @@ module tb_top;
     );
     always @(posedge clk) begin
         pc_val_dec <= pc_val_fetch;
+        newVect_dec <= newVect_fetch;
     end
     exec_top execute(
         .clk(clk),
-        .en(execEn),
+        .en(1'b1),
+        .newVect(newVect_dec),
         .readAddrA(readAddrA),
         .readAddrB(readAddrB),
         .doutA(doutA),
         .doutB(doutB),
-        .wenA(wenA),
-        .writeAddrA(writeAddrA),
-        .dinA(dinA),
+//        .wenA(wenA),
+//        .writeAddrA(writeAddrA),
+//        .dinA(dinA),
         .rs1(rs1),
         .rs2(rs2),
         .rd(rd),
@@ -188,11 +176,14 @@ module tb_top;
         .jal(jal),
         .jalr(jalr),
         .pc(pc_val_dec),
+        .wenA(wenA),
         .rdOut(rdOut),
         .aluVal(aluVal),
         .rs2ValOut(rs2Val),
         .modPc(modPc),
-        .pcVect(pcVect)
+        .pcVect(pcVect),
+        .a(_a),
+        .b(_b)
     );
     always @(posedge clk) begin
         memReadExec <= memReadDec;

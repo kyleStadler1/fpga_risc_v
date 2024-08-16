@@ -216,7 +216,7 @@ module decode(
                     _rs1 = instr[19:15];
                     _rs2 = instr[24:20];
                     _rd = 5'bxxxxx;
-                    _imm = {20'b0, instr[31:25], instr[11:7]};
+                    _imm = {{20{instr[31]}}, instr[31:25], instr[11:7]};
                     case(_funct3)
                         3'h0 : _alu_ctrl = ALU_BEQ;
                         3'h1 : _alu_ctrl = ALU_BNE;
@@ -324,21 +324,21 @@ module decode(
                 endcase
                 end 
         if (!en) begin
-                    _rs1 = 1'bx;
-                    _rs2 = 1'bx;
-                    _rd = 1'bx;
-                    _imm = 1'bx;
-                    _alu_ctrl = 1'bx;
-                    _alu_sel_A = 1'bx;
-                    _reg_write = 1'bx;
-                    _mem_read = 1'bx;
-                    _mem_write = 1'bx;
-                    _mem_size = 1'bx;
-                    _branch = 1'bx;
-                    _jal = 1'bx;
-                    _jalr = 1'bx;
-                    _lui = 1'bx;
-                    _aupc = 1'bx;
+//                    _rs1 = 1'bx;
+//                    _rs2 = 1'bx;
+//                    _rd = 1'bx;
+//                    _imm = 1'bx;
+//                    _alu_ctrl = 1'bx;
+//                    _alu_sel_A = 1'bx;
+//                    _reg_write = 1'bx;
+//                    _mem_read = 1'bx;
+//                    _mem_write = 1'bx;
+//                    _mem_size = 1'bx;
+//                    _branch = 1'bx;
+//                    _jal = 1'bx;
+//                    _jalr = 1'bx;
+//                    _lui = 1'bx;
+//                    _aupc = 1'bx;
                 end
     end
     assign rs1 = _rs1;

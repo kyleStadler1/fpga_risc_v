@@ -5,10 +5,10 @@ module top(
     output [31:0] IO
 );
 
-    reg [4:0] IO_addr = 5'd5;
+    reg [4:0] IO_addr = 5'd2;
     wire [31:0] IO_out;
     assign IO = IO_out;
-  //////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
     wire P0 = 1'dz; 
     wire instr_write_en;
     wire [31:0] dma_instr_addr;
@@ -44,12 +44,14 @@ module top(
     wire [4:0] readAddrB;
     wire [31:0] doutA; 
     wire [31:0] doutB; 
-    wire wenA;
-    wire [4:0] writeAddrA;
-    wire [31:0] dinA;
+  
+    //wire [4:0] writeAddrA;
+    //wire [31:0] dinA;
+    wire [31:0] _a, _b;
 //////////////////////////////////////////////////////////////////////////////////
     wire P4 = 1'dz;
     //execute output wires
+    wire wenA;
     wire [4:0] rdOut;
     wire [31:0] aluVal;
     wire [31:0] rs2Val;
@@ -66,11 +68,12 @@ module top(
     wire [4:0] writeAddrB;
     wire [31:0] dinB;
 //////////////////////////////////////////////////////////////////////////////////   
-   parameter decPipe = 2'd1;
-   parameter execPipe = 2'd0;
-   reg [2:0] ctr = 0;
-   wire decEn = 1;
-   wire execEn = 1;
+//   parameter decPipe = 2'd1;
+//   parameter execPipe = 2'd0;
+//   reg [2:0] ctr = 0;
+//   wire decEn;
+//   wire execEn;
+   
 //   always @(posedge clk) begin
 //        if (modPc) begin
 //            ctr <= 2'd3;
@@ -92,8 +95,8 @@ module top(
         .read_addr_A(readAddrA),
         .read_addr_B(readAddrB),
         .wen_A(wenA),
-        .write_addr_A(writeAddrA),
-        .din_A(dinA),
+        .write_addr_A(rdOut),
+        .din_A(aluVal),
         .wen_B(wenB),
         .write_addr_B(writeAddrB),
         .din_B(dinB),
@@ -112,8 +115,8 @@ module top(
      fetch_top fetch(
         //inputs
         .clk(clk),
-        .branch_vect(32'hffffffff),
-        .branch_en(1'b0),
+        .branch_vect(pcVect),
+        .branch_en(modPc),
         .dma_instr_write_en(instr_write_en),
         .dma_instr_addr(dma_instr_addr),
         .dma_instr_write_data(dma_instr_data),
@@ -143,8 +146,8 @@ module top(
          .jal(jal),
          .jalr(jalr),
          .lui(lui),
-         .aupc(aupc),
-         .debug()
+         .aupc(aupc)
+         //.debug()
     );
     always @(posedge clk) begin
         pc_val_dec <= pc_val_fetch;
@@ -156,9 +159,9 @@ module top(
         .readAddrB(readAddrB),
         .doutA(doutA),
         .doutB(doutB),
-        .wenA(wenA),
-        .writeAddrA(writeAddrA),
-        .dinA(dinA),
+//        .wenA(wenA),
+//        .writeAddrA(writeAddrA),
+//        .dinA(dinA),
         .rs1(rs1),
         .rs2(rs2),
         .rd(rd),
@@ -170,11 +173,14 @@ module top(
         .jal(jal),
         .jalr(jalr),
         .pc(pc_val_dec),
+        .wenA(wenA),
         .rdOut(rdOut),
         .aluVal(aluVal),
         .rs2ValOut(rs2Val),
         .modPc(modPc),
-        .pcVect(pcVect)
+        .pcVect(pcVect),
+        .a(_a),
+        .b(_b)
     );
     always @(posedge clk) begin
         memReadExec <= memReadDec;
