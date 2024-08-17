@@ -5,7 +5,7 @@ module top(
     output [31:0] IO
 );
 
-    reg [4:0] IO_addr = 5'd2;
+   reg [4:0] IO_addr = 5'd5;
     wire [31:0] IO_out;
     assign IO = IO_out;
 //////////////////////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@ module top(
     //fetch output wires
     wire [31:0] instruction; 
     wire [31:0] pc_val_fetch; 
+    wire newVect_fetch;
     wire instr_valid;
 //////////////////////////////////////////////////////////////////////////////////
     wire P3 = 1'dz;
@@ -39,6 +40,7 @@ module top(
     wire lui;
     wire aupc;
     reg [31:0] pc_val_dec;
+    reg newVect_dec;
     //regfile AB read, A write wires
     wire [4:0] readAddrA;
     wire [4:0] readAddrB;
@@ -68,26 +70,7 @@ module top(
     wire [4:0] writeAddrB;
     wire [31:0] dinB;
 //////////////////////////////////////////////////////////////////////////////////   
-//   parameter decPipe = 2'd1;
-//   parameter execPipe = 2'd0;
-//   reg [2:0] ctr = 0;
-//   wire decEn;
-//   wire execEn;
-   
-//   always @(posedge clk) begin
-//        if (modPc) begin
-//            ctr <= 2'd3;
-//        end
-//        if (ctr > 0) begin
-//            ctr <= ctr - 1;
-//        end
-//   end
-//   assign decEn = ctr <= decPipe;
-//   assign execEn = ctr <= execPipe;
-   
-
-
-
+    
 
     reg_file regfile (
         //inputs
@@ -123,7 +106,8 @@ module top(
         //outputs
         .instruction(instruction),
         .instr_valid(instr_valid),
-        .pc_val(pc_val_fetch)
+        .pc_val(pc_val_fetch),
+        .newVect(newVect_fetch)
     );
     dec_top decode(
          //inputs
@@ -151,10 +135,12 @@ module top(
     );
     always @(posedge clk) begin
         pc_val_dec <= pc_val_fetch;
+        newVect_dec <= newVect_fetch;
     end
     exec_top execute(
         .clk(clk),
         .en(1'b1),
+        .newVect(newVect_dec),
         .readAddrA(readAddrA),
         .readAddrB(readAddrB),
         .doutA(doutA),
